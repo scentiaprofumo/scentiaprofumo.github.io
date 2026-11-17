@@ -114,6 +114,7 @@ footer img{height:48px}
 // Para cambiar precios o sumar perfumes, editá solo esto.
 const WA = "595972166484";               // 0972 166 484 con código de Paraguay
 const PRECIO = {"5 ml": 30000, "10 ml": 55000};
+const RINDE = {"5 ml": "70 a 80", "10 ml": "130 a 160"};   // atomizaciones aproximadas
 const PERFUMES = [
   {img:"01-tropical-vibe", nombre:"Tropical Vibe", marca:"Rayhaan", notas:["Mango","Piña","Bergamota","Coco","Almizcle","Ámbar"]},
   {img:"02-urban-man-elixir", nombre:"Club de Nuit Urban Man Elixir", marca:"Armaf", notas:["Ambroxan","Bergamota","Pimienta rosa","Lavanda","Ámbar","Cedro"]},
@@ -126,7 +127,7 @@ const gs = n => "Gs. " + n.toLocaleString("es-PY");
 const wa = txt => `https://wa.me/${WA}?text=${encodeURIComponent(txt)}`;
 
 document.getElementById("precio-base").innerHTML = Object.entries(PRECIO)
-  .map(([t,p]) => `<div><small>Decant ${t}</small><b>${gs(p)}</b></div>`).join("");
+  .map(([t,p]) => `<div><small>Decant ${t}</small><b>${gs(p)}</b><small>Rinde ${RINDE[t]} atomizaciones</small></div>`).join("");
 document.getElementById("grid").innerHTML = PERFUMES.map((p,i) => `
   <article class="card">
     <img src="img/${p.img}.jpg" alt="${p.nombre} de ${p.marca}" loading="${i<2?"eager":"lazy"}" width="800" height="1000">
