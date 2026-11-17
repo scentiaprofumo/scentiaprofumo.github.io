@@ -62,18 +62,46 @@ footer{border-top:1px solid var(--line);padding-block:32px calc(96px + env(safe-
 footer img{height:48px}
 .wa-fijo{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));background:var(--wa);color:#05210f;font-weight:600;text-decoration:none;border-radius:99px;padding:14px 20px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
 .wa-fijo svg{width:20px;height:20px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(12,11,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tabs .w{display:flex;gap:6px;padding-block:10px}
+.tabs a{flex:1;text-align:center;text-decoration:none;padding:10px 12px;border-radius:99px;font-weight:600;color:var(--muted);border:1px solid var(--line)}
+.tabs a[aria-current="true"]{background:var(--gold);color:#16120c;border-color:var(--gold)}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);font:inherit;font-weight:600;padding:9px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--gold);color:#16120c}
+#buscar{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:99px;color:var(--fg);font:inherit;padding:10px 16px}
+.chk{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:14px}
+.chk input{accent-color:var(--gold)}
+.seg button:focus-visible,#buscar:focus-visible,.tabs a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.cuenta{color:var(--muted);font-size:14px;margin:0 0 14px}
+.grid.enteros{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.enteros .card img{aspect-ratio:6/5;object-fit:contain;background:#fff}
+.enteros .card .b{padding:12px;gap:8px}
+.enteros h3{font-size:16px}
+.enteros .precio{font-family:var(--display);font-size:22px;color:var(--gold);font-variant-numeric:tabular-nums}
+.enteros .btn{min-height:44px;font-size:14px}
+.tag{align-self:flex-start;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:#8c2f39;color:#fff}
+.tag.of{background:var(--gold);color:#16120c}
+.card.ago{opacity:.55}
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .2s}.card:hover{transform:translateY(-3px)}}
 </style>
 </head>
 <body>
 <header class="hero"><div class="w">
   <img src="img/logo.png" alt="Logo de Scentia">
-  <h1>Decants de <span>perfumes originales</span></h1>
-  <p class="lead">Probá el perfume en tu piel antes de pagar el frasco entero.</p>
+  <h1>Perfumes <span>originales</span></h1>
+  <p class="lead">Decants de 5 y 10 ml para probar en tu piel, y frascos enteros cuando ya sabés que es el tuyo.</p>
   <div class="chips"><span>5 y 10 ml</span><span>100% originales</span><span>Mariano Roque Alonso</span><span>Envíos a todo Paraguay</span></div>
 </div></header>
 
+<nav class="tabs" aria-label="Catálogos"><div class="w">
+  <a href="#decants" data-tab="decants">Decants</a>
+  <a href="#enteros" data-tab="enteros">Frascos enteros</a>
+</div></nav>
+
 <main>
+<div data-panel="decants">
 <section><div class="w">
   <div class="sec-t"><p class="k">Precios</p><h2>Un precio <span class="serif">para todos</span></h2></div>
   <div class="precio-base" id="precio-base"></div>
@@ -82,6 +110,22 @@ footer img{height:48px}
 <section id="perfumes"><div class="w">
   <div class="sec-t"><p class="k">Catálogo</p><h2>Nuestros <span class="serif">perfumes</span></h2></div>
   <div class="grid" id="grid"></div>
+</div></section>
+</div>
+
+<section data-panel="enteros" hidden><div class="w">
+  <div class="sec-t"><p class="k">Ofertas de noviembre</p><h2>Frascos <span class="serif">enteros</span></h2></div>
+  <div class="filtros">
+    <div class="seg" role="group" aria-label="Para quién">
+      <button type="button" data-genero="Todos" aria-pressed="true">Todos</button>
+      <button type="button" data-genero="Dama" aria-pressed="false">Dama</button>
+      <button type="button" data-genero="Caballero" aria-pressed="false">Caballero</button>
+    </div>
+    <input type="search" id="buscar" placeholder="Buscar perfume o marca…" aria-label="Buscar perfume" autocomplete="off">
+    <label class="chk"><input type="checkbox" id="ocultar" checked> Ocultar agotados</label>
+  </div>
+  <p class="cuenta" id="cuenta" aria-live="polite"></p>
+  <div class="grid enteros" id="grid-enteros"></div>
 </div></section>
 
 <section><div class="w">
@@ -97,7 +141,7 @@ footer img{height:48px}
   <div class="info">
     <div><h3>¿Qué es un decant?</h3><p>Perfume original, sacado del frasco de verdad y pasado a un atomizador chico. No es imitación: es el mismo perfume.</p></div>
     <div><h3>Entregas</h3><p>Estamos en Mariano Roque Alonso. Hacemos envíos a todo el país: el costo depende del destino y lo coordinamos por WhatsApp.</p></div>
-    <div><h3>Frascos enteros</h3><p>También vendemos los frascos completos. Consultanos el precio por WhatsApp.</p></div>
+    <div><h3>Frascos enteros</h3><p>También vendemos los frascos completos: mirá la pestaña <a href="#enteros">Frascos enteros</a>.</p></div>
   </div>
 </div></section>
 </main>
@@ -141,6 +185,53 @@ document.getElementById("grid").innerHTML = PERFUMES.map((p,i) => `
 const general = wa("Hola Scentia! Quiero hacer una consulta.");
 document.getElementById("wa-fijo").href = general;
 const num = document.getElementById("wa-num"); num.href = general; num.textContent = "0972 166 484";
+
+// Pestañas: #decants / #enteros
+function mostrar() {
+  const tab = location.hash === "#enteros" ? "enteros" : "decants";
+  document.querySelectorAll("[data-panel]").forEach(p => p.hidden = p.dataset.panel !== tab);
+  document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab));
+  if (tab === "enteros") cargarEnteros();
+}
+addEventListener("hashchange", () => { mostrar(); document.querySelector(".tabs").scrollIntoView(); });
+
+// Frascos enteros: enteros/enteros.json lo genera enteros.py desde los PDF del mes
+let ENTEROS = null;
+const filtro = {genero: "Todos", q: "", ocultar: true};
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+async function cargarEnteros() {
+  if (ENTEROS) return;
+  ENTEROS = [];
+  try { ENTEROS = await (await fetch("enteros/enteros.json")).json(); }
+  catch { document.getElementById("cuenta").textContent = "No se pudo cargar el catálogo. Escribinos por WhatsApp."; return; }
+  pintarEnteros();
+}
+function pintarEnteros() {
+  const q = norm(filtro.q.trim());
+  const lista = ENTEROS.filter(p => (filtro.genero === "Todos" || p.genero === filtro.genero)
+    && (!filtro.ocultar || !p.agotado) && (!q || norm(p.nombre).includes(q)));
+  document.getElementById("cuenta").textContent = `${lista.length} perfume${lista.length === 1 ? "" : "s"}`;
+  document.getElementById("grid-enteros").innerHTML = lista.map(p => {
+    const nombre = p.nombre + (p.ml ? ` ${p.ml} ml` : "");
+    return `<article class="card${p.agotado ? " ago" : ""}">
+      <img src="${p.foto}" alt="${nombre}" loading="lazy" width="455" height="380">
+      <div class="b">
+        ${p.agotado ? '<span class="tag">Agotado</span>' : p.oferta ? '<span class="tag of">Oferta</span>' : ""}
+        <div><div class="marca">${p.genero}</div><h3>${nombre}</h3></div>
+        <div class="precio">${gs(p.precio)}</div>
+        ${p.agotado ? '<span class="btn alt" aria-disabled="true">Agotado</span>'
+          : `<a class="btn" href="${wa(`Hola Scentia! Quiero el perfume entero ${nombre} (${gs(p.precio)}).`)}" target="_blank" rel="noopener">Pedir</a>`}
+      </div></article>`;
+  }).join("");
+}
+document.querySelectorAll("[data-genero]").forEach(b => b.onclick = () => {
+  filtro.genero = b.dataset.genero;
+  document.querySelectorAll("[data-genero]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  pintarEnteros();
+});
+document.getElementById("buscar").oninput = e => { filtro.q = e.target.value; pintarEnteros(); };
+document.getElementById("ocultar").onchange = e => { filtro.ocultar = e.target.checked; pintarEnteros(); };
+mostrar();
 </script>
 </body>
 </html>
