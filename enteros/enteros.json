@@ -766,7 +766,7 @@
 "precio": 195000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d070.jpg",
+"foto": "enteros/fotos/dama-9pm-lila-100.jpg",
 "pagina": 14
 },
 {
@@ -810,7 +810,7 @@
 "precio": 195000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d074.jpg",
+"foto": "enteros/fotos/dama-fakhar-rose-100.jpg",
 "pagina": 15
 },
 {
@@ -1360,7 +1360,7 @@
 "precio": 240000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d124.jpg",
+"foto": "enteros/fotos/dama-hawas-diva-100.jpg",
 "pagina": 23
 },
 {
@@ -2196,7 +2196,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c015.jpg",
+"foto": "enteros/fotos/caballero-jean-lowe-azure-100.jpg",
 "pagina": 4
 },
 {
@@ -3032,7 +3032,7 @@
 "precio": 100000,
 "agotado": false,
 "oferta": true,
-"foto": "enteros/img/c091.jpg",
+"foto": "enteros/fotos/caballero-philos-pura-none.jpg",
 "pagina": 17
 },
 {
@@ -3450,7 +3450,7 @@
 "precio": 240000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c129.jpg",
+"foto": "enteros/fotos/caballero-9pm-elixir-100.jpg",
 "pagina": 23
 },
 {
@@ -3912,7 +3912,7 @@
 "precio": 135000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c172.jpg",
+"foto": "enteros/fotos/caballero-summit-elixir-100.jpg",
 "pagina": 30
 },
 {
