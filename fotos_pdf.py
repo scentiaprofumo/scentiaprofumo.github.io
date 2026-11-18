@@ -1,5 +1,5 @@
-"""Foto Scentia desde la foto del propio PDF: se recorta el frasco y la caja (sin las barritas de notas,
-el círculo de "Inspiración" ni el fondo) y se pone sobre el mármol negro.
+"""Foto de cada perfume entero desde la foto del propio PDF: queda solo el frasco y la caja sobre blanco,
+sin las barritas de notas ni el círculo de "Inspiración" (decisión del usuario: nada más que el perfume).
 Uso: python fotos_pdf.py "<pdf dama>" "<pdf caballero>" [id id ...]   (sin ids = todos menos los agotados)
 Escribe enteros/fotos_pdf/<id>.jpg y apunta enteros.json a esas fotos. Cada mes: primero enteros.py, después este."""
 import json
@@ -8,24 +8,23 @@ from pathlib import Path
 import numpy as np
 import pymupdf
 from PIL import Image
-from playwright.sync_api import sync_playwright
 
 AQUI = Path(__file__).parent
-sys.path.insert(0, str(AQUI.parent / "posts"))
-import bienvenida as B  # noqa: E402
-from prototipo_fotos import png_uri, ESCENA  # noqa: E402
 import enteros as E  # noqa: E402
 
 OUT = AQUI / "enteros/fotos_pdf"
 # el recorte no los separa bien de las barritas o del círculo de "Inspiración": quedan con la foto del PDF
-NO_RECORTAR = {"KHAMRAH QAHWA", "CHANTS TENDERINA", "ASAD ELIXIR", "JEAN LOWE VIBE", "FAKHAR BLACK", "VICTORIOSO",
-               "HAYAATI GOLD ELIXIR", "ODYSSEY ARTISTO", "HONOR AND GLORY", "AJMAL EHSAAS"}
+NO_RECORTAR = set()
+# las barritas o el círculo están pegados al producto: se pinta de blanco lo que queda fuera de (izquierda, derecha),
+# en fracción del ancho de la foto, antes de recortar
+FRANJA = {"HONOR AND GLORY": (0, .61), "CHANTS TENDERINA": (0, .70), "KHAMRAH QAHWA": (0, .55),
+          "ASAD ELIXIR": (0, .655), "JEAN LOWE VIBE": (0, .655), "FAKHAR BLACK": (.03, .68), "VICTORIOSO": (0, .65),
+          "HAYAATI GOLD ELIXIR": (0, .72), "ODYSSEY ARTISTO": (0, .735)}
 
 
 def solo_producto(im, rgba):
-    """Deja la mancha más grande (caja + frasco suelen tocarse) y las casi tan grandes; saca barritas y círculos.
-    Productos blancos sobre fondo blanco: rembg los deja agujereados, así que dentro del contorno del producto
-    vuelve opaco todo lo que no sea el fondo blanco que llega desde los bordes."""
+    """La IA (isnet) solo decide QUÉ piezas son el producto (caja + frasco) y descarta barritas y círculos.
+    El recorte en sí es borrar el fondo blanco que llega desde los bordes: nunca se come partes del producto."""
     from scipy import ndimage
     from scipy.spatial import ConvexHull
     from PIL import ImageDraw
@@ -62,13 +61,23 @@ def solo_producto(im, rgba):
     marca = im.copy()
     w, h = im.size
     for xy in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
-        ImageDraw.floodfill(marca, xy, (255, 0, 255), thresh=12)
+        ImageDraw.floodfill(marca, xy, (255, 0, 255), thresh=16)
     fondo = np.all(np.asarray(marca) == (255, 0, 255), axis=2)
-    alfa[(np.asarray(casco) > 0) & ~fondo] = 255
-    alfa[~ndimage.binary_dilation(np.asarray(casco) > 0, iterations=2)] = 0
+    alfa = (~fondo & ndimage.binary_dilation(np.asarray(casco) > 0, iterations=2)).astype(np.uint8) * 255
     out = im.convert("RGBA")
     out.putalpha(Image.fromarray(alfa))
     return out.crop(Image.fromarray(((alfa > 60) * 255).astype(np.uint8)).getbbox())
+
+
+def en_blanco(foto):
+    """El perfume solo, sobre blanco, centrado en un lienzo 6:5 (el de las tarjetas de la web) con aire alrededor."""
+    w, h = foto.size
+    m = int(0.08 * max(w, h))
+    cw, ch = w + 2 * m, h + 2 * m
+    cw, ch = max(cw, int(ch * 1.2)), max(ch, int(cw / 1.2))
+    lienzo = Image.new("RGBA", (cw, ch), (255, 255, 255, 255))
+    lienzo.alpha_composite(foto, ((cw - w) // 2, (ch - h) // 2))
+    return lienzo.convert("RGB")
 
 
 def main(pdfs, ids):
@@ -81,31 +90,28 @@ def main(pdfs, ids):
         if ((p["id"] in ids) if ids else not p["agotado"]) and p["nombre"].upper() not in NO_RECORTAR:
             por_pagina.setdefault((p["genero"], p["pagina"]), []).append(p)
     docs = {("Dama" if "dama" in Path(f).name.lower() else "Caballero"): pymupdf.open(f) for f in pdfs}
-    B.OUT = AQUI.parent / "posts/bienvenida"
-    B.LOGO = B.uri(B.FLY / "logo-scentia.png")
-    fondo = B.uri(AQUI.parent / "posts/prototipo/_marmol_sq.png")
-    B.OUT = OUT
     hechos = 0
-    with sync_playwright() as pw:
-        for (genero, pagina), lista in por_pagina.items():
-            pg = docs[genero][pagina - 1]
-            perfumes, _ = E.perfumes_de(pg)
-            for p in lista:
-                # la celda de este perfume en la página: misma etiqueta de nombre y precio
-                cel = next((q["celda"] for q in perfumes if q["precio"] == p["precio"]
-                            and E.limpiar(q["nombre"])[0] == p["nombre"]), None)
-                if cel is None:
-                    continue
-                pix = pg.get_pixmap(clip=cel, dpi=220)
-                im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-                foto = solo_producto(im, remove(im, session=sesion))
-                html = B.pagina(800, 670, fondo, ESCENA.format(pb=70, gy=40, gw=620, foto=png_uri(foto), mw=640, mh=520, bw=420, lw=520))
-                B.render(pw, p["id"], 800, 670, html)
-                png = OUT / f'{p["id"]}.png'
-                Image.open(png).convert("RGB").save(OUT / f'{p["id"]}.jpg', quality=86, optimize=True)
-                png.unlink()
-                p["foto"] = f'enteros/fotos_pdf/{p["id"]}.jpg'
-                hechos += 1
+    for (genero, pagina), lista in por_pagina.items():
+        pg = docs[genero][pagina - 1]
+        perfumes, _ = E.perfumes_de(pg)
+        for p in lista:
+            # la celda de este perfume en la página: misma etiqueta de nombre y precio
+            cel = next((q["celda"] for q in perfumes if q["precio"] == p["precio"]
+                        and E.limpiar(q["nombre"])[0] == p["nombre"]), None)
+            if cel is None:
+                continue
+            pix = pg.get_pixmap(clip=cel, dpi=220)
+            im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+            if p["nombre"].upper() in FRANJA:
+                izq, der = FRANJA[p["nombre"].upper()]
+                arr = np.asarray(im).copy()
+                arr[:, :int(izq * im.width)] = 255
+                arr[:, int(der * im.width):] = 255
+                im = Image.fromarray(arr)
+            foto = solo_producto(im, remove(im, session=sesion))
+            en_blanco(foto).save(OUT / f'{p["id"]}.jpg', quality=90, optimize=True)
+            p["foto"] = f'enteros/fotos_pdf/{p["id"]}.jpg'
+            hechos += 1
     (AQUI / "enteros/enteros.json").write_text(json.dumps(datos, ensure_ascii=False, indent=0), encoding="utf-8")
     print(hechos, "fotos")
 
