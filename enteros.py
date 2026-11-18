@@ -112,6 +112,11 @@ def main(pdfs):
     raros = [t for t in todos if len(t["nombre"]) < 3 or t["precio"] > 400000]
     for r in raros:
         print("REVISAR", r)
+    # las fotos Scentia ya elegidas (fotos_finales.py) siguen valiendo el mes que viene
+    elegidas = AQUI / "fotos_elegidas.json"
+    elegidas = json.loads(elegidas.read_text(encoding="utf-8")) if elegidas.exists() else {}
+    for t in todos:
+        t["foto"] = elegidas.get(f'{t["genero"]}|{t["nombre"].upper()}|{t["ml"]}', t["foto"])
     (OUT / "enteros.json").write_text(json.dumps(todos, ensure_ascii=False, indent=0), encoding="utf-8")
 
 

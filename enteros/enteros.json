@@ -51,7 +51,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d005.jpg",
+"foto": "enteros/fotos/dama-odyssey-femme-80.jpg",
 "pagina": 2
 },
 {
@@ -579,7 +579,7 @@
 "precio": 140000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d053.jpg",
+"foto": "enteros/fotos/dama-yara-moi-100.jpg",
 "pagina": 11
 },
 {
@@ -843,7 +843,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d077.jpg",
+"foto": "enteros/fotos/dama-odyssey-candee-none.jpg",
 "pagina": 15
 },
 {
@@ -997,7 +997,7 @@
 "precio": 175000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d091.jpg",
+"foto": "enteros/fotos/dama-yara-elixir-100.jpg",
 "pagina": 18
 },
 {
@@ -1316,7 +1316,7 @@
 "precio": 125000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d120.jpg",
+"foto": "enteros/fotos/dama-sabah-al-ward-100.jpg",
 "pagina": 22
 },
 {
@@ -1701,7 +1701,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/d156.jpg",
+"foto": "enteros/fotos/dama-eclaire-pistache-100.jpg",
 "pagina": 28
 },
 {
@@ -1756,7 +1756,7 @@
 "precio": 95000,
 "agotado": false,
 "oferta": true,
-"foto": "enteros/img/d161.jpg",
+"foto": "enteros/fotos/dama-ajwad-pink-100.jpg",
 "pagina": 29
 },
 {
@@ -2185,7 +2185,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c014.jpg",
+"foto": "enteros/fotos/caballero-jean-lowe-verde-aura-none.jpg",
 "pagina": 4
 },
 {
@@ -2526,7 +2526,7 @@
 "precio": 245000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c045.jpg",
+"foto": "enteros/fotos/caballero-asad-collection-25.jpg",
 "pagina": 9
 },
 {
@@ -2724,7 +2724,7 @@
 "precio": 225000,
 "agotado": false,
 "oferta": true,
-"foto": "enteros/img/c063.jpg",
+"foto": "enteros/fotos/caballero-mandaryn-elixir-100.jpg",
 "pagina": 12
 },
 {
@@ -3153,7 +3153,7 @@
 "precio": 160000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c102.jpg",
+"foto": "enteros/fotos/caballero-fakhar-black-100.jpg",
 "pagina": 18
 },
 {
@@ -3417,7 +3417,7 @@
 "precio": 170000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c126.jpg",
+"foto": "enteros/fotos/caballero-khamrah-100.jpg",
 "pagina": 23
 },
 {
@@ -3439,7 +3439,7 @@
 "precio": 195000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c128.jpg",
+"foto": "enteros/fotos/caballero-club-de-nuit-intense-105.jpg",
 "pagina": 23
 },
 {
@@ -3582,7 +3582,7 @@
 "precio": 230000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c141.jpg",
+"foto": "enteros/fotos/caballero-club-de-nuit-urban-elxir-100.jpg",
 "pagina": 25
 },
 {
@@ -3791,7 +3791,7 @@
 "precio": 115000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c161.jpg",
+"foto": "enteros/fotos/caballero-ameer-al-arab-100.jpg",
 "pagina": 28
 },
 {
@@ -3868,7 +3868,7 @@
 "precio": 150000,
 "agotado": false,
 "oferta": true,
-"foto": "enteros/img/c168.jpg",
+"foto": "enteros/fotos/caballero-odyssey-bahamas-100.jpg",
 "pagina": 29
 },
 {
@@ -4000,7 +4000,7 @@
 "precio": 170000,
 "agotado": false,
 "oferta": false,
-"foto": "enteros/img/c180.jpg",
+"foto": "enteros/fotos/caballero-tropical-vibe-100.jpg",
 "pagina": 31
 },
 {
