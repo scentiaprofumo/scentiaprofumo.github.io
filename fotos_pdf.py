@@ -15,18 +15,19 @@ import enteros as E  # noqa: E402
 OUT = AQUI / "enteros/fotos_pdf"
 # el recorte no los separa bien de las barritas o del círculo de "Inspiración": quedan con la foto del PDF
 NO_RECORTAR = set()
+# sets con varios frascos en fila: la IA marca solo uno y el corte de la derecha se llevaría los demás
+SIN_CORTE_DERECHA = {"KIT YARA"}
 # las barritas o el círculo están pegados al producto: se pinta de blanco lo que queda fuera de (izquierda, derecha),
 # en fracción del ancho de la foto, antes de recortar
 FRANJA = {"HONOR AND GLORY": (0, .61), "CHANTS TENDERINA": (0, .70), "KHAMRAH QAHWA": (0, .55),
           "ASAD ELIXIR": (0, .655), "JEAN LOWE VIBE": (0, .655), "FAKHAR BLACK": (.03, .68), "VICTORIOSO": (0, .65),
-          "HAYAATI GOLD ELIXIR": (0, .72), "ODYSSEY ARTISTO": (0, .735)}
+          "HAYAATI GOLD ELIXIR": (0, .72), "ODYSSEY ARTISTO": (0, .735), "MOHRA": (0, .65)}
 
 
-def solo_producto(im, rgba):
+def solo_producto(im, rgba, corte_derecha=True):
     """La IA (isnet) solo decide QUÉ piezas son el producto (caja + frasco) y descarta barritas y círculos.
     El recorte en sí es borrar el fondo blanco que llega desde los bordes: nunca se come partes del producto."""
     from scipy import ndimage
-    from scipy.spatial import ConvexHull
     from PIL import ImageDraw
     alfa = np.asarray(rgba.getchannel("A")).copy()
     etiquetas, n = ndimage.label(alfa > 60)
@@ -52,18 +53,24 @@ def solo_producto(im, rgba):
                     cambio = True
                     break
     mascara = np.isin(etiquetas, [i + 1 for i in quedan])
-    # contorno (envolvente convexa) del producto
-    ys, xs = np.nonzero(mascara)
-    pts = np.c_[xs, ys][:: max(1, len(xs) // 4000)]
-    casco = Image.new("L", im.size, 0)
-    ImageDraw.Draw(casco).polygon([tuple(pts[i]) for i in ConvexHull(pts).vertices], fill=255)
-    # fondo: blanco casi puro conectado con los bordes
+    # fondo: blanco casi puro conectado con los bordes de la foto
     marca = im.copy()
     w, h = im.size
     for xy in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
-        ImageDraw.floodfill(marca, xy, (255, 0, 255), thresh=16)
+        ImageDraw.floodfill(marca, xy, (255, 0, 255), thresh=8)
     fondo = np.all(np.asarray(marca) == (255, 0, 255), axis=2)
-    alfa = (~fondo & ndimage.binary_dilation(np.asarray(casco) > 0, iterations=2)).astype(np.uint8) * 255
+    # queda todo lo que no es fondo y toca alguna pieza elegida: la caja y el frasco salen con su forma real,
+    # aunque la IA no haya visto una parte clara; lo separado por blanco (barritas, círculo) se va
+    # (antes se cortan los hilos finos de píxeles grises que a veces unen las barritas con la caja)
+    solido = ndimage.binary_opening(~fondo, iterations=3)
+    trozos, _ = ndimage.label(solido)
+    elegidos = np.unique(trozos[mascara & solido])
+    quedan = ndimage.binary_dilation(np.isin(trozos, elegidos[elegidos > 0]), iterations=4) & ~fondo
+    # las barritas y el círculo de "Inspiración" siempre están a la derecha: se corta lo que sobresale a la derecha
+    # de lo que la IA marcó como producto (a la izquierda no se toca: ahí suelen estar las cajas que no ve entera)
+    if corte_derecha:
+        quedan[:, np.nonzero(mascara)[1].max() + 6:] = False
+    alfa = quedan.astype(np.uint8) * 255
     out = im.convert("RGBA")
     out.putalpha(Image.fromarray(alfa))
     return out.crop(Image.fromarray(((alfa > 60) * 255).astype(np.uint8)).getbbox())
@@ -108,7 +115,7 @@ def main(pdfs, ids):
                 arr[:, :int(izq * im.width)] = 255
                 arr[:, int(der * im.width):] = 255
                 im = Image.fromarray(arr)
-            foto = solo_producto(im, remove(im, session=sesion))
+            foto = solo_producto(im, remove(im, session=sesion), p["nombre"].upper() not in SIN_CORTE_DERECHA)
             en_blanco(foto).save(OUT / f'{p["id"]}.jpg', quality=90, optimize=True)
             p["foto"] = f'enteros/fotos_pdf/{p["id"]}.jpg'
             hechos += 1
