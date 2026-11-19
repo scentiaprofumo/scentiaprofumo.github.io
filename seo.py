@@ -70,7 +70,9 @@ def pagina(titulo_, descripcion, url, cuerpo, jsonld, imagen=None):
 {cuerpo}
 <footer>Scentia · Perfumes árabes originales en Paraguay · Delivery y envíos a todo el país ·
 WhatsApp <a href="https://wa.me/{WA}">0972 166 484</a> · Instagram <a href="https://instagram.com/scentiaprofumo">@scentiaprofumo</a></footer>
-</div></body></html>
+</div>
+<script data-goatcounter="https://scentiaprofumo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body></html>
 """
 
 
