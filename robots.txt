@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /_candidatas/
+
+Sitemap: https://scentiaprofumo.github.io/sitemap.xml

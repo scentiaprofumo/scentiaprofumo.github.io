@@ -48,12 +48,12 @@ def puntaje(img):
     return (any(o in host for o in OFICIALES), w * h)
 
 
-def main(n):
+def main(n, ids=()):
     DEST.mkdir(exist_ok=True)
     key = clave()
     todos = json.loads((AQUI / "enteros/enteros.json").read_text(encoding="utf-8"))
     salida = []
-    for p in prioridad(todos, n):
+    for p in ([p for p in todos if p["id"] in ids] if ids else prioridad(todos, n)):
         q = f'{p["nombre"]} {p["ml"] or 100}ml perfume bottle box'
         imgs = sorted((i for i in buscar(q, key) if puntaje(i)), key=puntaje, reverse=True)
         fotos = []
@@ -75,4 +75,5 @@ def main(n):
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]))
+    # python buscar_fotos.py 30   |   python buscar_fotos.py ids d135 c084 ...
+    main(0, sys.argv[2:]) if sys.argv[1] == "ids" else main(int(sys.argv[1]))

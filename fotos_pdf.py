@@ -94,7 +94,8 @@ def main(pdfs, ids):
     datos = json.loads((AQUI / "enteros/enteros.json").read_text(encoding="utf-8"))
     por_pagina = {}
     for p in datos:
-        if ((p["id"] in ids) if ids else not p["agotado"]) and p["nombre"].upper() not in NO_RECORTAR:
+        # los que tienen foto de internet elegida (enteros/fotos/, ver fotos_finales.py) no se pisan
+        if ((p["id"] in ids) if ids else not p["agotado"]) and p["nombre"].upper() not in NO_RECORTAR                 and not p["foto"].startswith("enteros/fotos/"):
             por_pagina.setdefault((p["genero"], p["pagina"]), []).append(p)
     docs = {("Dama" if "dama" in Path(f).name.lower() else "Caballero"): pymupdf.open(f) for f in pdfs}
     hechos = 0
