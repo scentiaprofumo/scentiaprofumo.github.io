@@ -16,6 +16,19 @@ valor = lambda m: int(m.group(1) + m.group(2))
 ML = re.compile(r"(\d{2,3})\s*ML\b", re.I)
 
 
+# precio de venta: el PDF trae el precio del proveedor; al usuario le cobran DESCUENTO menos (ej. Kit Radio:
+# catálogo 175.000, pagó 160.000). Venta = (catálogo - DESCUENTO) x MARGEN, redondeado para arriba a 5.000.
+# El costo no se guarda en la web (es pública).
+DESCUENTO, MARGEN, REDONDEO = 15000, 1.5, 5000
+
+
+def precio_venta(catalogo):
+    return -(-int((catalogo - DESCUENTO) * MARGEN) // REDONDEO) * REDONDEO
+
+
+assert precio_venta(175000) == 240000 and precio_venta(205000) == 285000
+
+
 def lineas(pagina):
     for b in pagina.get_text("dict")["blocks"]:
         for l in b.get("lines", []):
@@ -100,7 +113,7 @@ def main(pdfs):
                 foto = f"{genero[0].lower()}{n_gen:03d}.jpg"
                 pix = pg.get_pixmap(clip=p["celda"], dpi=110)
                 pix.save(OUT / "img" / foto, jpg_quality=78)
-                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=p["precio"],
+                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=precio_venta(p["precio"]),
                                   agotado=p["agotado"], oferta=p["oferta"], foto=f"enteros/img/{foto}", pagina=i + 1))
         assert n_gen + viejos_total == esperados, f"{genero}: saqué {n_gen} de {esperados} precios"
         if a_ojo != esperados:
@@ -109,13 +122,16 @@ def main(pdfs):
     # el PDF repite algunos perfumes en dos páginas: queda el primero
     vistos = set()
     todos = [t for t in todos if (k := (t["genero"], t["nombre"], t["ml"], t["precio"])) not in vistos and not vistos.add(k)]
-    raros = [t for t in todos if len(t["nombre"]) < 3 or t["precio"] > 400000]
+    raros = [t for t in todos if len(t["nombre"]) < 3 or t["precio"] > 600000]
     for r in raros:
         print("REVISAR", r)
     # las fotos Scentia ya elegidas (fotos_finales.py) siguen valiendo el mes que viene
     elegidas = AQUI / "fotos_elegidas.json"
     elegidas = json.loads(elegidas.read_text(encoding="utf-8")) if elegidas.exists() else {}
     for t in todos:
+        # recorte ya hecho por fotos_pdf.py (mismo PDF = mismo id): se reusa; un PDF nuevo pide correr fotos_pdf.py
+        if (AQUI / f'enteros/fotos_pdf/{t["id"]}.jpg').exists() and not t["agotado"]:
+            t["foto"] = f'enteros/fotos_pdf/{t["id"]}.jpg'
         t["foto"] = elegidas.get(f'{t["genero"]}|{t["nombre"].upper()}|{t["ml"]}', t["foto"])
     (OUT / "enteros.json").write_text(json.dumps(todos, ensure_ascii=False, indent=0), encoding="utf-8")
 
