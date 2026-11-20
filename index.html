@@ -112,7 +112,8 @@ s.antes{opacity:.6;margin-right:4px}
 .semana img{width:88px;height:110px;object-fit:cover;border-radius:12px;flex:none}
 .semana h2{font-family:var(--display);font-size:clamp(22px,5vw,30px);text-transform:uppercase;line-height:1.05;margin:2px 0 4px}
 .semana p{margin:0;color:#e6dfd3}
-.semana .btn{display:inline-flex;margin-top:10px;min-height:44px;padding:8px 16px}
+.semana .sem-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.semana .btn{display:inline-flex;width:auto;min-height:44px;padding:8px 16px}
 .kits{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 .kit{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px}
 .kit h3{font-family:var(--display);font-size:26px;text-transform:uppercase}
@@ -509,7 +510,8 @@ function pintarDecants() {
     $("#semana").innerHTML = `<img src="img/${s.img}.jpg" alt="">
       <div><p class="k">Perfume de la semana</p><h2>${s.nombre}</h2>
       <p>5 ml a <b>${gs(precioUnidad(s, "5 ml"))}</b> y 10 ml a <b>${gs(precioUnidad(s, "10 ml"))}</b>, hasta el ${fin}.</p>
-      <button type="button" class="btn" data-add="d" data-n="${esc(s.nombre)}" data-tam="5 ml">Agregar 5 ml</button></div>`;
+      <div class="sem-btns"><button type="button" class="btn alt" data-add="d" data-n="${esc(s.nombre)}" data-tam="5 ml">Agregar 5 ml</button>
+      <button type="button" class="btn" data-add="d" data-n="${esc(s.nombre)}" data-tam="10 ml">Agregar 10 ml</button></div></div>`;
   }
   $("#kits-grid").innerHTML = KITS.map(k => `<div class="kit"><h3>${k.nombre}</h3>
     <p>${k.n} decants de ${k.tam}, los elegís vos.</p>
