@@ -93,32 +93,36 @@ def main():
         f.unlink()
     for p in datos:
         nombre = titulo(p["nombre"])
+        marca = p.get("marca", "")
+        de = f" de {marca}" if marca else ""
         ml = f' {p["ml"]} ml' if p["ml"] else ""
         url = f"{SITIO}/perfumes/{p['slug']}.html"
         img = f"{SITIO}/{p['foto']}"
         disp = "Agotado por ahora" if p["agotado"] else "Disponible"
-        t = f"{nombre}{ml} precio en Paraguay | Scentia"
-        d = (f"{nombre}{ml} original para {p['genero'].lower()} a {gs(p['precio'])} en Paraguay. "
+        t = f"{nombre}{de}{ml} precio en Paraguay | Scentia"
+        d = (f"{nombre}{de}{ml} original para {p['genero'].lower()} a {gs(p['precio'])} en Paraguay. "
              f"{'Agotado por ahora: consultá reposición. ' if p['agotado'] else ''}Delivery y envíos a todo el país. Pedilo por WhatsApp.")
         msg = f"Hola Scentia! Quiero el perfume entero {nombre}{ml} ({gs(p['precio'])})."
         boton = (f'<span class="ago">Agotado</span><p><a class="btn" href="https://wa.me/{WA}?text='
                  f'{html.escape(re.sub(" ", "%20", "Hola Scentia! ¿Cuándo vuelve " + nombre + ml + "?"))}">Avisame cuando vuelva</a></p>'
                  if p["agotado"] else
                  f'<p><a class="btn" href="https://wa.me/{WA}?text={html.escape(msg.replace(" ", "%20"))}">Pedir por WhatsApp</a></p>')
-        mismos = [q for q in datos if q["genero"] == p["genero"] and not q["agotado"] and q is not p]
+        mismos = ([q for q in datos if marca and q.get("marca") == marca and not q["agotado"] and q is not p]
+                  or [q for q in datos if q["genero"] == p["genero"] and not q["agotado"] and q is not p])
         i = datos.index(p)
         otros = (mismos[i % max(1, len(mismos)):] + mismos)[:8]
         relacionados = "".join(f'<li><a href="{q["slug"]}.html">{html.escape(titulo(q["nombre"]))}</a> <span class="m">{gs(q["precio"])}</span></li>' for q in otros)
         cuerpo = f"""<nav><a href="/">Scentia</a> › <a href="/perfumes/">Perfumes {p['genero'].lower()}</a> › {html.escape(nombre)}</nav>
 <div class="prod"><img src="/{p['foto']}" alt="{html.escape(nombre + ml)}, perfume original para {p['genero'].lower()}, frasco y caja" width="800" height="667">
 <div><h1>{html.escape(nombre)}{ml}</h1>
-<p class="m">Perfume original · {p['genero']} · {disp}</p>
+<p class="m">{f'<a href="marca-{slug(marca)}.html">{html.escape(marca)}</a> · ' if marca else ""}Perfume original · {p['genero']} · {disp}</p>
 <div class="precio">{gs(p['precio'])}</div>{boton}
-<p>Frasco entero de {html.escape(nombre)}{ml}, 100% original. Hacemos delivery y envíos a todo Paraguay: el costo depende del destino y lo coordinamos por WhatsApp.</p>
+<p>Frasco entero de {html.escape(nombre)}{html.escape(de)}{ml}, 100% original. Delivery de Gs. 10.000 a 30.000 según la zona (gratis desde Gs. 349.000) y envíos a todo Paraguay.</p>
 <p>¿Querés probarlo antes? Mirá nuestros <a href="/#decants">decants de 5 y 10 ml</a>.</p></div></div>
-<h2>Otros perfumes para {p['genero'].lower()}</h2><ul class="l">{relacionados}</ul>"""
+<h2>{f"Más perfumes de {html.escape(marca)}" if marca and mismos and mismos[0].get("marca") == marca else f"Otros perfumes para {p['genero'].lower()}"}</h2><ul class="l">{relacionados}</ul>"""
         jsonld = [{
             "@context": "https://schema.org", "@type": "Product", "name": f"{nombre}{ml}", "image": img,
+            **({"brand": {"@type": "Brand", "name": marca}} if marca else {}),
             "description": f"Perfume original {nombre}{ml} para {p['genero'].lower()}.", "url": url,
             "offers": {"@type": "Offer", "price": p["precio"], "priceCurrency": "PYG", "url": url,
                        "availability": "https://schema.org/OutOfStock" if p["agotado"] else "https://schema.org/InStock",
@@ -130,6 +134,26 @@ def main():
                 {"@type": "ListItem", "position": 3, "name": f"{nombre}{ml}", "item": url}]}]
         (out / f"{p['slug']}.html").write_text(pagina(t, d, url, cuerpo, jsonld, img), encoding="utf-8")
 
+    # una página por marca (desde 3 perfumes): "Perfumes Lattafa originales en Paraguay"
+    por_marca = {}
+    for p in datos:
+        if p.get("marca"):
+            por_marca.setdefault(p["marca"], []).append(p)
+    marcas = sorted((m for m, l in por_marca.items() if len(l) >= 3), key=lambda m: -len(por_marca[m]))
+    for m in marcas:
+        lst = sorted(por_marca[m], key=lambda x: (x["agotado"], x["nombre"]))
+        url = f"{SITIO}/perfumes/marca-{slug(m)}.html"
+        items = "".join(f'<li><a href="{p["slug"]}.html">{html.escape(titulo(p["nombre"]))}{" " + str(p["ml"]) + " ml" if p["ml"] else ""}</a>'
+                        f' <span class="m">{p["genero"]} · {gs(p["precio"])}{" · agotado" if p["agotado"] else ""}</span></li>' for p in lst)
+        disp = [p for p in lst if not p["agotado"]]
+        cuerpo = f"""<nav><a href="/">Scentia</a> › <a href="/perfumes/">Perfumes</a> › {html.escape(m)}</nav>
+<h1>Perfumes {html.escape(m)} originales en Paraguay</h1>
+<p>{len(disp)} perfumes de {html.escape(m)} disponibles, desde {gs(min(p["precio"] for p in disp))}. Delivery y envíos a todo Paraguay. ¿Querés probar antes? Mirá nuestros <a href="/#decants">decants de 5 y 10 ml</a>.</p>
+<ul class="l">{items}</ul>"""
+        (out / f"marca-{slug(m)}.html").write_text(pagina(f"Perfumes {m} originales y precios en Paraguay | Scentia",
+            f"{len(disp)} perfumes {m} originales con su precio en Paraguay, para dama y caballero. Delivery y envíos a todo el país.",
+            url, cuerpo, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"Perfumes {m}", "url": url}), encoding="utf-8")
+
     # lista completa: lo que Google lee para descubrir las páginas
     def lista(g):
         return "".join(f'<li><a href="{p["slug"]}.html">{html.escape(titulo(p["nombre"]))}{" " + str(p["ml"]) + " ml" if p["ml"] else ""}</a>'
@@ -138,6 +162,7 @@ def main():
     cuerpo = f"""<nav><a href="/">Scentia</a> › Perfumes</nav>
 <h1>Perfumes árabes originales en Paraguay</h1>
 <p>Lista completa de frascos enteros con su precio en guaraníes. Delivery y envíos a todo Paraguay. Para probar antes de comprar el frasco, mirá nuestros <a href="/#decants">decants de 5 y 10 ml</a>.</p>
+<h2>Por marca</h2><ul class="l">{"".join(f'<li><a href="marca-{slug(m)}.html">{html.escape(m)}</a> <span class="m">{len(por_marca[m])}</span></li>' for m in marcas)}</ul>
 <h2>Perfumes para dama</h2><ul class="l">{lista("Dama")}</ul>
 <h2>Perfumes para caballero</h2><ul class="l">{lista("Caballero")}</ul>"""
     (out / "index.html").write_text(pagina("Lista de perfumes árabes originales y precios en Paraguay | Scentia",
@@ -174,7 +199,8 @@ def main():
                  lambda m: m.group(1) + json.dumps(portada, ensure_ascii=False) + m.group(2), idx, count=1, flags=re.S)
     (AQUI / "index.html").write_text(idx, encoding="utf-8")
 
-    urls = [(SITIO + "/", "1.0"), (SITIO + "/perfumes/", "0.8")] + [(f"{SITIO}/perfumes/{p['slug']}.html", "0.6") for p in datos]
+    urls = ([(SITIO + "/", "1.0"), (SITIO + "/perfumes/", "0.8")] + [(f"{SITIO}/perfumes/marca-{slug(m)}.html", "0.7") for m in marcas]
+            + [(f"{SITIO}/perfumes/{p['slug']}.html", "0.6") for p in datos] + [(SITIO + "/privacidad.html", "0.1")])
     (AQUI / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"<url><loc>{u}</loc><lastmod>{HOY}</lastmod><priority>{pr}</priority></url>\n" for u, pr in urls) + "</urlset>\n", encoding="utf-8")
     (AQUI / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /_candidatas/\n\nSitemap: {SITIO}/sitemap.xml\n", encoding="utf-8")

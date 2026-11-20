@@ -25,10 +25,17 @@ ML = re.compile(r"(\d{2,3})\s*ML\b", re.I)
 DESCUENTO, MARGEN, REDONDEO = 15000, 1.5, 5000
 CARO, MARGEN_CARO, PISO_CARO = 200000, 1.4, 280000
 PREMIUM = 220000
+# Los más conocidos (los que se comparan con Nissei, Shopping China, Mega...) van con margen menor y sin piso.
+MARGEN_FAMOSO = 1.3
+FAMOSOS = (r"KHAMRAH|KHAMARAH|^ASAD|^YARA|CLUB DE NUIT (INTENSE|ICONIC|URBAN|UNTOLD|WOMAN|MALEKA)|^HAWAS|^9PM|^9AM|ECLAIRE|"
+           r"QAED AL FURSAN|OUD FOR GLORY|NOBLE BLUSH|AMESTHYST|^HAYAATI|^FAKHAR|ODYSSEY (MANDARYN|HOMME)|^ANA ABIYE|^NEBRAS|"
+           r"^BAD FEMME|^ISHQ AL SHUYUK|^MAYAR|^SABAH AL WARD|^TERIAQ|^HONOR AND GLORY|^HER CONFESSION|^BHARARA KING")
 
 
-def precio_venta(catalogo):
+def precio_venta(catalogo, nombre=""):
     redondear = lambda x: -(-int(x) // REDONDEO) * REDONDEO
+    if re.search(FAMOSOS, nombre.upper()):
+        return redondear((catalogo - DESCUENTO) * MARGEN_FAMOSO)
     if catalogo >= CARO:
         return max(redondear((catalogo - DESCUENTO) * MARGEN_CARO), PISO_CARO)
     return redondear((catalogo - DESCUENTO) * MARGEN)
@@ -37,6 +44,25 @@ def precio_venta(catalogo):
 assert precio_venta(175000) == 240000 and precio_venta(195000) == 270000
 assert precio_venta(200000) == 280000 and precio_venta(220000) == 290000 and precio_venta(300000) == 400000
 assert all(precio_venta(c) <= precio_venta(c + 1000) for c in range(100000, 600000, 1000))
+assert precio_venta(172000, "KHAMRAH") == 205000 and precio_venta(172000, "Khamrah Qahwa") == 205000
+
+
+MARCAS = json.loads((AQUI / "datos/marcas.json").read_text(encoding="utf-8"))
+clave_marca = lambda s: re.sub(r"[^A-Z0-9]", "", s.upper())
+
+
+def marca_de(nombre):
+    """Marca según datos/marcas.json: nombre exacto, prefijo o regla (para los perfumes nuevos de cada mes)."""
+    c = clave_marca(nombre)
+    if c in MARCAS["exactas"]:
+        return MARCAS["exactas"][c]
+    for pre, marca in MARCAS["prefijos"].items():
+        if c.startswith(pre):
+            return marca
+    return next((marca for pat, marca in MARCAS["reglas"] if re.search(pat, nombre.upper())), "")
+
+
+assert marca_de("CLUB DE NUIT INTENSE") == "Armaf" and marca_de("ECLAIRE PISTACHE") == "Lattafa"
 
 
 def lineas(pagina):
@@ -123,7 +149,7 @@ def main(pdfs):
                 foto = f"{genero[0].lower()}{n_gen:03d}.jpg"
                 pix = pg.get_pixmap(clip=p["celda"], dpi=110)
                 pix.save(OUT / "img" / foto, jpg_quality=78)
-                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=precio_venta(p["precio"]), premium=p["precio"] >= PREMIUM,
+                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=precio_venta(p["precio"], nombre), premium=p["precio"] >= PREMIUM,
                                   agotado=p["agotado"], oferta=p["oferta"], foto=f"enteros/img/{foto}", pagina=i + 1))
         assert n_gen + viejos_total == esperados, f"{genero}: saqué {n_gen} de {esperados} precios"
         if a_ojo != esperados:
@@ -143,6 +169,11 @@ def main(pdfs):
         if (AQUI / f'enteros/fotos_pdf/{t["id"]}.jpg').exists() and not t["agotado"]:
             t["foto"] = f'enteros/fotos_pdf/{t["id"]}.jpg'
         t["foto"] = elegidas.get(f'{t["genero"]}|{t["nombre"].upper()}|{t["ml"]}', t["foto"])
+    for t in todos:
+        t["marca"] = marca_de(t["nombre"])
+    sin = sorted({t["nombre"] for t in todos if not t["marca"] and not t["agotado"]})
+    if sin:
+        print(f"SIN MARCA ({len(sin)}), agregarlas en datos/marcas.json:", " | ".join(sin))
     (OUT / "enteros.json").write_text(json.dumps(todos, ensure_ascii=False, indent=0), encoding="utf-8")
 
 

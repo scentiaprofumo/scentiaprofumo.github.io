@@ -26,6 +26,7 @@
 :root{--bg:#0c0b0a;--panel:#151311;--line:#2c2620;--fg:#f2ede4;--muted:#a59c8f;--gold:#d4af6a;--wa:#25d366;
 --display:Oswald,"Arial Narrow",Impact,sans-serif;--serif:"Playfair Display",Georgia,serif;--body:Inter,system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased}
 .w{max-width:1120px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
 a{color:inherit}
@@ -86,6 +87,12 @@ footer img{height:48px}
 .chk input{accent-color:var(--gold)}
 .seg button:focus-visible,#buscar:focus-visible,.tabs a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .cuenta{color:var(--muted);font-size:14px;margin:0 0 14px}
+.marcas{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin:4px 0 8px;scrollbar-width:thin}
+.marcas button{flex:none;border:1px solid var(--line);background:none;color:#e6dfd3;border-radius:99px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.marcas button small{color:var(--muted);margin-left:4px}
+.marcas button[aria-pressed="true"]{background:var(--gold);color:#16120c;border-color:var(--gold)}
+.marcas button[aria-pressed="true"] small{color:#16120c}
+.marcas button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .grid.enteros{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
 .enteros .card img{aspect-ratio:6/5;object-fit:contain;background:#fff}
 .enteros .card .b{padding:12px;gap:8px}
@@ -112,6 +119,7 @@ s.antes{opacity:.6;margin-right:4px}
 .kit p{margin:0;color:#e6dfd3}
 .kit small{color:var(--muted)}
 .kit .btn{margin-top:auto}
+.kit .mini-kit{margin-bottom:6px}
 .suerte{text-align:center;border:1px solid var(--line);border-radius:18px;padding:28px 20px;background:radial-gradient(80% 90% at 50% 0%,#2a2219,var(--panel))}
 .suerte h2{font-family:var(--display);font-size:clamp(28px,6vw,40px);text-transform:uppercase}
 .suerte h2 .serif{text-transform:none}
@@ -247,13 +255,14 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
       <button type="button" data-genero="Dama" aria-pressed="false">Dama</button>
       <button type="button" data-genero="Caballero" aria-pressed="false">Caballero</button>
     </div>
-    <input type="search" id="buscar" placeholder="Buscar perfume o marca…" aria-label="Buscar perfume" autocomplete="off">
+    <input type="search" id="buscar" placeholder="Buscar perfume o marca (Lattafa, Armaf…)" aria-label="Buscar perfume" autocomplete="off">
     <label class="chk"><input type="checkbox" id="ocultar" checked> Ocultar agotados</label>
     <label class="chk"><input type="checkbox" id="ofertas"> Solo ofertas</label>
     <select class="orden" id="orden" aria-label="Ordenar">
       <option value="">Ordenar</option><option value="asc">Menor precio</option><option value="desc">Mayor precio</option><option value="az">A a Z</option>
     </select>
   </div>
+  <div class="marcas" id="filtro-marcas" role="group" aria-label="Marca"></div>
   <p class="cuenta" id="cuenta" aria-live="polite"></p>
   <div class="grid enteros" id="grid-enteros"></div>
 </div></section>
@@ -357,6 +366,11 @@ const KITS = [
   {id: "fav", nombre: "Favoritos", n: 3, tam: "10 ml", precio: 149900},
 ];
 const EXTRA_PREM = {"5 ml": 10000, "10 ml": 20000};      // por cada Premium dentro de un kit
+// kits por estilo: ya armados, mismo precio que el kit base (3 × 5 ml)
+const ESTILOS = [
+  {nombre: "Dulces", kit: "d3", txt: "Caramelo, vainilla y frutas tropicales.", perfumes: ["Eclaire", "Sabah Al Ward", "Tropical Vibe"]},
+  {nombre: "Noche", kit: "d3", txt: "Oud, ámbar y especias para salir.", perfumes: ["Qaed Al Fursan", "Club de Nuit Urban Man Elixir", "Summit Elixir"]},
+];
 // Perfume de la semana: va rotando en este orden, de lunes a domingo (hora de Paraguay)
 const SEMANA = {orden: ["Eclaire", "Qaed Al Fursan", "Tropical Vibe", "Sabah Al Ward", "Club de Nuit Urban Man Elixir", "Summit Elixir"],
                 desc: {"5 ml": 5000, "10 ml": 10000}};
@@ -496,7 +510,16 @@ function pintarDecants() {
     <p>${k.n} decants de ${k.tam}, los elegís vos.</p>
     <div class="precio">${gs(k.precio)}</div>
     <small>Ahorrás ${gs(k.n * PRECIO.std[k.tam] - k.precio)} frente a comprarlos sueltos. Cada Premium suma ${gs(EXTRA_PREM[k.tam])}.</small>
-    <button type="button" class="btn" data-kit="${k.id}">Armar mi kit</button></div>`).join("");
+    <button type="button" class="btn" data-kit="${k.id}">Armar mi kit</button></div>`).join("")
+    + ESTILOS.map((s, i) => {
+      const k = KITS.find(x => x.id === s.kit), ps = s.perfumes.map(n => PERF[n]).filter(Boolean);
+      if (!k || ps.length !== k.n) return "";
+      const pr = k.precio + ps.filter(x => x.premium).length * EXTRA_PREM[k.tam];
+      return `<div class="kit"><div class="mini-kit">${ps.map(x => `<img class="flyer" src="${mini(x)}" alt="">`).join("")}</div>
+        <h3>Kit ${s.nombre}</h3><p>${s.txt}</p><small>${ps.map(x => x.nombre).join(", ")} · ${k.n} × ${k.tam}</small>
+        <div class="precio">${gs(pr)}</div>
+        <button type="button" class="btn" data-estilo="${i}">Agregar el kit</button></div>`;
+    }).join("");
   $("#info-envio").textContent = `Delivery de ${DELIVERY}, gratis desde ${gs(ENVIO_GRATIS)}. Envíos al interior: lo coordinamos por WhatsApp.`;
   $("#info-frasco").textContent = `Si compraste el decant, llevá el frasco con ${gs(FRASCO.decant)} menos (${gs(FRASCO.kit)} si fue en un kit), por 30 días, en frascos desde ${gs(FRASCO.minimo)}.`;
 }
@@ -520,8 +543,9 @@ function linea(it) {
     const k = KITS.find(x => x.id === it.kit), ps = (it.perfumes || []).map(n => PERF[n]);
     if (!k || ps.length !== k.n || ps.some(x => !x)) return null;
     const pr = k.precio + ps.filter(x => x.premium).length * EXTRA_PREM[k.tam];
-    return {titulo: `Kit ${k.nombre}`, sub: `${k.n} decants de ${k.tam}: ${it.perfumes.join(", ")}`,
-            msg: `Kit ${k.nombre} (${k.n} × ${k.tam}): ${it.perfumes.join(", ")}`, imgs: ps.slice(0, 3).map(mini), unidad: pr, base: pr};
+    const nk = it.estilo ? `${it.estilo}` : k.nombre;
+    return {titulo: `Kit ${nk}`, sub: `${k.n} decants de ${k.tam}: ${it.perfumes.join(", ")}`,
+            msg: `Kit ${nk} (${k.n} × ${k.tam}): ${it.perfumes.join(", ")}`, imgs: ps.slice(0, 3).map(mini), unidad: pr, base: pr};
   }
   return null;
 }
@@ -688,11 +712,27 @@ async function girar() {
 }
 
 // ---------- frascos enteros ----------
-const filtro = {genero: "Todos", q: "", ocultar: true, ofertas: false, orden: ""};
+const filtro = {genero: "Todos", q: "", ocultar: true, ofertas: false, orden: "", marca: "Todas"};
+let MARCAS_TOP = [];
+function pintarMarcas() {
+  const cuenta = {};
+  ENTEROS.filter(p => !p.agotado && p.marca).forEach(p => cuenta[p.marca] = (cuenta[p.marca] || 0) + 1);
+  MARCAS_TOP = Object.keys(cuenta).filter(m => cuenta[m] >= 3).sort((a, b) => cuenta[b] - cuenta[a]);
+  const otras = ENTEROS.filter(p => !p.agotado && !MARCAS_TOP.includes(p.marca)).length;
+  const op = [["Todas", ""], ...MARCAS_TOP.map(m => [m, cuenta[m]]), ...(otras ? [["Otras marcas", otras]] : [])];
+  $("#filtro-marcas").innerHTML = op.map(([m, n]) => `<button type="button" data-marca="${esc(m)}" aria-pressed="${filtro.marca === m}">${esc(m)}${n ? `<small>${n}</small>` : ""}</button>`).join("");
+}
+$("#filtro-marcas").onclick = e => {
+  const b = e.target.closest("[data-marca]"); if (!b) return;
+  filtro.marca = b.dataset.marca; gc("filtro-marca");
+  document.querySelectorAll("[data-marca]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  pintarEnteros();
+};
 function pintarEnteros() {
   const q = norm(filtro.q.trim());
   const lista = ENTEROS.filter(p => (filtro.genero === "Todos" || p.genero === filtro.genero)
-    && (!filtro.ocultar || !p.agotado) && (!filtro.ofertas || p.oferta) && (!q || norm(p.nombre).includes(q)));
+    && (!filtro.ocultar || !p.agotado) && (!filtro.ofertas || p.oferta) && (!q || norm(p.nombre + " " + (p.marca || "")).includes(q))
+    && (filtro.marca === "Todas" || (filtro.marca === "Otras marcas" ? !MARCAS_TOP.includes(p.marca) : p.marca === filtro.marca)));
   if (filtro.orden === "asc") lista.sort((a, b) => a.precio - b.precio);
   if (filtro.orden === "desc") lista.sort((a, b) => b.precio - a.precio);
   if (filtro.orden === "az") lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -703,7 +743,7 @@ function pintarEnteros() {
       <img src="${p.foto}" alt="${nombre}" loading="lazy" width="455" height="380">
       <div class="b">
         ${p.agotado ? '<span class="tag">Agotado</span>' : p.oferta ? '<span class="tag of">Oferta</span>' : ""}
-        <div><div class="marca">${p.genero}</div><h3><a href="perfumes/${p.slug}.html">${nombre}</a></h3></div>
+        <div><div class="marca">${p.marca ? esc(p.marca) + " · " : ""}${p.genero}</div><h3><a href="perfumes/${p.slug}.html">${nombre}</a></h3></div>
         <div class="precio">${gs(p.precio)}</div>
         ${p.agotado ? '<span class="btn alt" aria-disabled="true">Agotado</span>'
           : `<button type="button" class="btn" data-add="e" data-slug="${p.slug}">Agregar</button>`}
@@ -729,6 +769,8 @@ document.addEventListener("click", e => {
     return;
   }
   const k = e.target.closest("[data-kit]"); if (k) return abrirKit(k.dataset.kit);
+  const es = e.target.closest("[data-estilo]");
+  if (es) { const s = ESTILOS[+es.dataset.estilo]; return agregar({t: "k", kit: s.kit, perfumes: s.perfumes, estilo: s.nombre}); }
   const q = e.target.closest("[data-q]");
   if (q) { const it = carro[+q.dataset.i]; if (it) { it.q += +q.dataset.q; guardar(); } return; }
   if (e.target.closest("[data-ver-pedido]")) { $("#toast").innerHTML = ""; return abrirCarro(); }
@@ -771,7 +813,7 @@ addEventListener("hashchange", () => {
   catch { $("#cuenta").textContent = "No se pudo cargar el catálogo. Escribinos por WhatsApp."; }
   ENT = Object.fromEntries(ENTEROS.map(e => [e.slug, e]));
   PERFUMES.forEach(p => { p.ent = ENTEROS.find(e => e.nombre === p.entero); p.premium = !!(p.ent && p.ent.premium); });
-  pintarDecants(); pintarEnteros(); pintarCuenta(); iniciarGoogle(); cargarPerfil();
+  pintarDecants(); pintarMarcas(); pintarEnteros(); pintarCuenta(); iniciarGoogle(); cargarPerfil();
   if (["#kits", "#suerte"].includes(location.hash)) $(location.hash).scrollIntoView();
 })();
 </script>
