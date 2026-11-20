@@ -147,8 +147,12 @@ def main():
 
     # portada: negocio, decants con precio y preguntas frecuentes
     idx = (AQUI / "index.html").read_text(encoding="utf-8")
-    precios = dict(re.findall(r'"(\d+ ml)": (\d+)', re.search(r"const PRECIO = \{[^}]*\}", idx).group(0)))
-    decants = re.findall(r'\{img:"([^"]+)", nombre:"([^"]+)", marca:"([^"]+)"', idx)
+    # PRECIO = {std: {"5 ml": .., "10 ml": ..}, prem: {...}}; Premium = el frasco del catálogo es premium (enteros.py)
+    bloque = re.search(r"const PRECIO = (.*?);$", idx, re.M).group(1)
+    precios = {k: [int(v) for v in re.findall(r'"\d+ ml": (\d+)', b)] for k, b in re.findall(r"(std|prem): (\{[^}]*\})", bloque)}
+    premium = {d["nombre"] for d in datos if d.get("premium")}
+    decants = [(img, n, m, "prem" if e in premium else "std")
+               for img, n, m, e in re.findall(r'\{img:"([^"]+)", nombre:"([^"]+)", marca:"([^"]+)", entero:"([^"]+)"', idx)]
     portada = [
         {"@context": "https://schema.org", "@type": "OnlineStore", "name": "Scentia", "url": SITIO + "/",
          "logo": SITIO + "/img/logo.png", "description": "Perfumes árabes originales, decants de 5 y 10 ml y frascos enteros en Paraguay.",
@@ -157,14 +161,15 @@ def main():
         {"@context": "https://schema.org", "@type": "ItemList", "name": "Decants de perfumes árabes", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "item": {
                 "@type": "Product", "name": f"Decant {n} de {m}", "brand": {"@type": "Brand", "name": m}, "image": f"{SITIO}/img/{img}.jpg",
-                "offers": {"@type": "AggregateOffer", "priceCurrency": "PYG", "lowPrice": min(map(int, precios.values())),
-                           "highPrice": max(map(int, precios.values())), "offerCount": len(precios)}}}
-            for i, (img, n, m) in enumerate(decants)]},
+                "offers": {"@type": "AggregateOffer", "priceCurrency": "PYG", "lowPrice": min(precios[k]),
+                           "highPrice": max(precios[k]), "offerCount": len(precios[k])}}}
+            for i, (img, n, m, k) in enumerate(decants)]},
         {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": "¿Qué es un decant?", "acceptedAnswer": {"@type": "Answer", "text": "Es perfume original sacado del frasco y pasado a un atomizador chico de 5 o 10 ml, para probarlo antes de comprar el frasco entero."}},
             {"@type": "Question", "name": "¿Los perfumes son originales?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Cada decant sale del frasco original; no vendemos imitaciones."}},
             {"@type": "Question", "name": "¿Para cuánto alcanza un decant?", "acceptedAnswer": {"@type": "Answer", "text": "5 ml rinden de 70 a 80 atomizaciones y 10 ml de 130 a 160."}},
-            {"@type": "Question", "name": "¿Hacen envíos?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, contamos con delivery y hacemos envíos a todo Paraguay. El costo depende del destino."}}]}]
+            {"@type": "Question", "name": "¿Hacen envíos?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, contamos con delivery (Gs. 10.000 a 30.000 según la zona, gratis desde Gs. 349.000) y hacemos envíos a todo Paraguay; los envíos al interior se coordinan por WhatsApp."}},
+            {"@type": "Question", "name": "¿Cómo se paga?", "acceptedAnswer": {"@type": "Answer", "text": "Por transferencia o en efectivo."}}]}]
     idx = re.sub(r'(<script type="application/ld\+json">).*?(</script>)',
                  lambda m: m.group(1) + json.dumps(portada, ensure_ascii=False) + m.group(2), idx, count=1, flags=re.S)
     (AQUI / "index.html").write_text(idx, encoding="utf-8")

@@ -19,14 +19,24 @@ ML = re.compile(r"(\d{2,3})\s*ML\b", re.I)
 # precio de venta: el PDF trae el precio del proveedor; al usuario le cobran DESCUENTO menos (ej. Kit Radio:
 # catálogo 175.000, pagó 160.000). Venta = (catálogo - DESCUENTO) x MARGEN, redondeado para arriba a 5.000.
 # El costo no se guarda en la web (es pública).
+# Desde CARO de catálogo el margen baja a MARGEN_CARO (para competir), pero nunca por debajo de PISO_CARO:
+# así un perfume caro no queda más barato que uno que cuesta menos.
+# Premium (decants a otro precio): catálogo desde PREMIUM.
 DESCUENTO, MARGEN, REDONDEO = 15000, 1.5, 5000
+CARO, MARGEN_CARO, PISO_CARO = 200000, 1.4, 280000
+PREMIUM = 220000
 
 
 def precio_venta(catalogo):
-    return -(-int((catalogo - DESCUENTO) * MARGEN) // REDONDEO) * REDONDEO
+    redondear = lambda x: -(-int(x) // REDONDEO) * REDONDEO
+    if catalogo >= CARO:
+        return max(redondear((catalogo - DESCUENTO) * MARGEN_CARO), PISO_CARO)
+    return redondear((catalogo - DESCUENTO) * MARGEN)
 
 
-assert precio_venta(175000) == 240000 and precio_venta(205000) == 285000
+assert precio_venta(175000) == 240000 and precio_venta(195000) == 270000
+assert precio_venta(200000) == 280000 and precio_venta(220000) == 290000 and precio_venta(300000) == 400000
+assert all(precio_venta(c) <= precio_venta(c + 1000) for c in range(100000, 600000, 1000))
 
 
 def lineas(pagina):
@@ -113,7 +123,7 @@ def main(pdfs):
                 foto = f"{genero[0].lower()}{n_gen:03d}.jpg"
                 pix = pg.get_pixmap(clip=p["celda"], dpi=110)
                 pix.save(OUT / "img" / foto, jpg_quality=78)
-                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=precio_venta(p["precio"]),
+                todos.append(dict(id=foto[:-4], genero=genero, nombre=nombre, ml=ml, precio=precio_venta(p["precio"]), premium=p["precio"] >= PREMIUM,
                                   agotado=p["agotado"], oferta=p["oferta"], foto=f"enteros/img/{foto}", pagina=i + 1))
         assert n_gen + viejos_total == esperados, f"{genero}: saqué {n_gen} de {esperados} precios"
         if a_ojo != esperados:
