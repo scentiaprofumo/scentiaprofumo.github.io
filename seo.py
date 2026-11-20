@@ -194,7 +194,7 @@ def main():
             {"@type": "Question", "name": "¿Los perfumes son originales?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Cada decant sale del frasco original; no vendemos imitaciones."}},
             {"@type": "Question", "name": "¿Para cuánto alcanza un decant?", "acceptedAnswer": {"@type": "Answer", "text": "5 ml rinden de 70 a 80 atomizaciones y 10 ml de 130 a 160."}},
             {"@type": "Question", "name": "¿Hacen envíos?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, contamos con delivery (Gs. 10.000 a 30.000 según la zona, gratis desde Gs. 349.000) y hacemos envíos a todo Paraguay; los envíos al interior se coordinan por WhatsApp."}},
-            {"@type": "Question", "name": "¿Cómo se paga?", "acceptedAnswer": {"@type": "Answer", "text": "Por transferencia o en efectivo."}}]}]
+            {"@type": "Question", "name": "¿Cómo se paga?", "acceptedAnswer": {"@type": "Answer", "text": "Decants y kits: por transferencia o en efectivo al recibir con delivery. Frascos enteros y envíos al interior: por transferencia antes del envío."}}]}]
     idx = re.sub(r'(<script type="application/ld\+json">).*?(</script>)',
                  lambda m: m.group(1) + json.dumps(portada, ensure_ascii=False) + m.group(2), idx, count=1, flags=re.S)
     (AQUI / "index.html").write_text(idx, encoding="utf-8")
