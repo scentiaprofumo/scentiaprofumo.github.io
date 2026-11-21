@@ -48,7 +48,8 @@ section[id]{scroll-margin-top:64px}
 .sec-t h2 .serif{text-transform:none;font-weight:700}
 .precio-base{display:flex;gap:12px;flex-wrap:wrap}
 .precio-base div{flex:1;min-width:140px;border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--panel)}
-.precio-base b{display:block;white-space:nowrap;font-family:var(--display);font-size:clamp(24px,6vw,30px);color:var(--gold);font-variant-numeric:tabular-nums}
+.precio-base b span{white-space:nowrap}
+.precio-base b{display:block;font-family:var(--display);font-size:clamp(24px,6vw,30px);color:var(--gold);font-variant-numeric:tabular-nums}
 .precio-base small{color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
@@ -213,6 +214,34 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 @media (prefers-reduced-motion:no-preference){dialog.hoja[open]{animation:sube .25s ease-out}}
 @keyframes sube{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .2s}.card:hover{transform:translateY(-3px)}}
+.lado{position:fixed;z-index:6;display:flex;background:rgba(12,11,10,.95);backdrop-filter:blur(8px)}
+.lado a,.lado button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);text-decoration:none;font:inherit;font-size:11px;font-weight:600;background:none;border:0;cursor:pointer;padding:8px 4px;border-radius:12px}
+.lado svg{width:22px;height:22px}
+@media (hover:hover){.lado a:hover,.lado button:hover{color:var(--gold)}}
+.lado a:focus-visible,.lado button:focus-visible,.promo:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.lado i{position:absolute;top:2px;left:calc(50% + 4px);background:var(--gold);color:#16120c;font-style:normal;font-size:10.5px;min-width:18px;height:18px;line-height:18px;border-radius:99px;padding:0 4px}
+@media (min-width:1000px){.lado{left:0;top:0;bottom:0;width:84px;flex-direction:column;justify-content:center;gap:8px;border-right:1px solid var(--line)}body{padding-left:84px}}
+/* celu: el mismo menú, escondido; lo abre el botón de abajo a la izquierda */
+.lado-btn{display:none}
+@media (max-width:999px){.lado-btn{display:grid;place-items:center;position:fixed;z-index:7;left:max(16px,env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:99px;background:var(--panel);color:var(--gold);border:1.5px solid var(--gold);box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:pointer}
+.lado-btn svg{width:24px;height:24px}
+.lado-btn[aria-expanded="true"] .ico-menu,.lado-btn[aria-expanded="false"] .ico-x{display:none}
+.lado-btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.lado{left:max(12px,env(safe-area-inset-left));bottom:calc(80px + env(safe-area-inset-bottom));flex-direction:column;gap:2px;padding:8px 6px;width:76px;max-height:calc(100vh - 100px);overflow-y:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.6);transform:translateX(calc(-100% - 24px));visibility:hidden;transition:transform .2s ease,visibility .2s}
+.lado.abierto{transform:none;visibility:visible}
+.lado a,.lado button{min-height:50px}}
+@media (prefers-reduced-motion:reduce){.lado{transition:none}}
+#promos{padding-block:0 8px}
+.promos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.promo{display:flex;flex-direction:column;gap:2px;text-decoration:none;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel)}
+.promo .k{font-size:10.5px;letter-spacing:.2em}
+.promo b{font-family:var(--display);font-size:20px;text-transform:uppercase;line-height:1.1}
+.promo small{color:var(--gold);font-size:13px}
+.promo.dest{border-color:var(--gold);background:linear-gradient(135deg,#2a2219,var(--panel))}
+.promo:hover{border-color:var(--gold)}
+#cuenta-box{scroll-margin-top:64px}
+@media (max-width:760px){.promos{grid-template-columns:1fr 1fr;gap:10px}.promo{padding:12px}.promo b{font-size:17px}}
+@media (max-width:600px){header.hero{padding-block:28px 24px}.hero img{height:72px}}
 </style>
 </head>
 <body>
@@ -222,6 +251,24 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
   <p class="lead">Decants de 5 y 10 ml para probar en tu piel, y frascos enteros de Lattafa, Armaf, Maison Alhambra, Afnan y más, con delivery y envíos a todo Paraguay.</p>
   <div class="chips"><span>5 y 10 ml</span><span>100% originales</span><span>Delivery</span><span>Envíos a todo Paraguay</span></div>
 </div></header>
+
+<section id="promos" aria-label="Promos"><div class="w"><div class="promos">
+  <a class="promo dest" href="#semana-sec" id="promo-semana" hidden><span class="k">Perfume de la semana</span><b id="promo-sem-n"></b><small id="promo-sem-p"></small></a>
+  <a class="promo" href="#suerte"><span class="k">Ruleta diaria</span><b>Girá y ganá</b><small>Un descuento por 24 h</small></a>
+  <a class="promo" href="#kits"><span class="k">Kits</span><b>Probá varios</b><small id="promo-kits"></small></a>
+  <a class="promo" href="#beneficios"><span class="k">Beneficios</span><b>2x1 y envío gratis</b><small id="promo-envio"></small></a>
+</div></div></section>
+
+<nav class="lado" id="lado" aria-label="Secciones">
+  <a href="#promos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>Promos</a>
+  <a href="#perfumes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>Decants</a>
+  <a href="#kits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18M12 8S10 3 7.5 4 9 8 12 8zm0 0s2-5 4.5-4S15 8 12 8z"/></svg>Kits</a>
+  <a href="#suerte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7M12 14v7M3 12h7M14 12h7"/></svg>Ruleta</a>
+  <a href="#enteros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="9" width="12" height="12" rx="2"/><path d="M10 9V6h4v3M9 3h6v3H9z"/></svg>Frascos</a>
+  <a href="#cuenta-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>Cuenta</a>
+  <button type="button" id="nav-pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Pedido<i id="nav-n" hidden></i></button>
+</nav>
+<button type="button" class="lado-btn" id="lado-btn" aria-controls="lado" aria-expanded="false" aria-label="Menú de secciones"><svg class="ico-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="ico-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 
 <nav class="tabs" aria-label="Catálogos"><div class="w">
   <a href="#decants" data-tab="decants">Decants</a>
@@ -270,7 +317,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
   <div class="grid enteros" id="grid-enteros"></div>
 </div></section>
 
-<section id="cuenta"><div class="w"><div class="cuenta-box" id="cuenta-box"></div></div></section>
+<section id="mi-cuenta"><div class="w"><div class="cuenta-box" id="cuenta-box"></div></div></section>
 
 <section id="suerte"><div class="w"><div class="suerte">
   <p class="k">Una vez por día</p>
@@ -291,7 +338,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
   </div>
 </div></section>
 
-<section><div class="w">
+<section id="beneficios"><div class="w">
   <div class="info">
     <div><h3>¿Qué es un decant?</h3><p>Perfume original, sacado del frasco de verdad y pasado a un atomizador chico. No es imitación: es el mismo perfume.</p></div>
     <div><h3>Delivery y envíos</h3><p id="info-envio"></p></div>
@@ -487,7 +534,7 @@ const titulo = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
 // ---------- decants ----------
 function pintarDecants() {
   $("#precio-base").innerHTML = ["std", "prem"].map(k => `<div><small>${k === "std" ? "Decants" : "Decants Premium"}</small>
-    <b>${gs(PRECIO[k]["5 ml"])} · ${gs(PRECIO[k]["10 ml"])}</b><small>5 ml (${RINDE["5 ml"]} atomizaciones) · 10 ml (${RINDE["10 ml"]})</small></div>`).join("");
+    <b><span>${gs(PRECIO[k]["5 ml"])}</span> · <span>${gs(PRECIO[k]["10 ml"])}</span></b><small>5 ml (${RINDE["5 ml"]} atomizaciones) · 10 ml (${RINDE["10 ml"]})</small></div>`).join("");
   $("#grid").innerHTML = PERFUMES.map((p, i) => {
     const e = p.ent && !p.ent.agotado ? p.ent : null;
     return `<article class="card">
@@ -505,7 +552,8 @@ function pintarDecants() {
   }).join("");
   const s = PERF[deLaSemana];
   if (s) {
-    $("#semana-sec").hidden = false;
+    $("#semana-sec").hidden = false; $("#promo-semana").hidden = false;
+    $("#promo-sem-n").textContent = s.nombre; $("#promo-sem-p").textContent = `5 ml a ${gs(precioUnidad(s, "5 ml"))}`;
     const fin = finSemana.toLocaleDateString("es-PY", {weekday: "long", day: "numeric", month: "numeric", timeZone: "America/Asuncion"});
     $("#semana").innerHTML = `<img src="img/${s.img}.jpg" alt="">
       <div><p class="k">Perfume de la semana</p><h2>${s.nombre}</h2>
@@ -530,6 +578,8 @@ function pintarDecants() {
   $("#info-pago").textContent = EFECTIVO
     ? "Decants y kits: transferencia, o efectivo al recibir (con delivery). Frascos enteros y envíos al interior: transferencia antes del envío."
     : "Transferencia. Te pasamos los datos por WhatsApp y confirmamos el pedido cuando vemos el pago.";
+  $("#promo-kits").textContent = `Desde ${gs(Math.min(...KITS.map(k => k.precio)))}`;
+  $("#promo-envio").textContent = `Delivery gratis desde ${gs(ENVIO_GRATIS)}`;
   $("#info-envio").textContent = `Delivery de ${DELIVERY}, gratis desde ${gs(ENVIO_GRATIS)}. Envíos al interior: lo coordinamos por WhatsApp.`;
   $("#info-frasco").textContent = `Si compraste el decant, llevá el frasco con ${gs(FRASCO.decant)} menos (${gs(FRASCO.kit)} si fue en un kit), por 30 días, en frascos desde ${gs(FRASCO.minimo)}.`;
 }
@@ -605,6 +655,7 @@ function pintarCarro() {
   const n = c.lineas.reduce((a, {it}) => a + it.q, 0);
   const btn = $("#carro-btn");
   btn.hidden = !n; $("#wa-fijo").hidden = !!n;
+  $("#nav-n").hidden = !n; $("#nav-n").textContent = n;
   btn.textContent = `Ver pedido (${n}) · ${gs(c.total)}`;
   $("#lineas").innerHTML = c.lineas.length ? c.lineas.map(({it, l}) => {
     const i = carro.indexOf(it);
@@ -795,7 +846,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("[data-ver-pedido]")) { $("#toast").innerHTML = ""; return abrirCarro(); }
   if (e.target.closest("[data-cerrar]")) e.target.closest("dialog").close();
 });
-$("#carro-btn").onclick = abrirCarro;
+$("#carro-btn").onclick = $("#nav-pedido").onclick = abrirCarro;
 $("#continuar").onclick = () => paso(2);
 $("#volver").onclick = () => paso(1);
 $("#fpedido").oninput = pintarCarro;
@@ -814,15 +865,25 @@ const general = wa("Hola Scentia! Quiero hacer una consulta.");
 $("#wa-fijo").href = general;
 const num = $("#wa-num"); num.href = general; num.textContent = "0972 166 484";
 
-// Pestañas: #decants / #enteros (#kits y #suerte abren Decants y bajan hasta ahí)
+// Pestañas: #decants / #enteros; cualquier otro #id abre Decants y baja hasta esa sección
 function mostrar() {
   const tab = location.hash === "#enteros" ? "enteros" : "decants";
   document.querySelectorAll("[data-panel]").forEach(p => p.hidden = p.dataset.panel !== tab);
   document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab));
 }
-addEventListener("hashchange", () => {
-  mostrar();
-  (["#kits", "#suerte"].includes(location.hash) ? $(location.hash) : $(".tabs")).scrollIntoView();
+// menú del celu: se abre con el botón y se cierra al elegir, tocar afuera, bajar o con Esc
+const lado = $("#lado"), ladoBtn = $("#lado-btn");
+function menu(abrir) { lado.classList.toggle("abierto", abrir); ladoBtn.setAttribute("aria-expanded", abrir); }
+ladoBtn.onclick = () => menu(!lado.classList.contains("abierto"));
+document.addEventListener("click", e => { if (!e.target.closest("#lado-btn") && (!e.target.closest("#lado") || e.target.closest("#lado a, #lado button"))) menu(false); });
+addEventListener("scroll", () => menu(false), {passive: true});
+addEventListener("keydown", e => { if (e.key === "Escape") menu(false); });
+function ir() { (document.getElementById(location.hash.slice(1)) || $(".tabs")).scrollIntoView(); }
+addEventListener("hashchange", () => { mostrar(); ir(); });
+// tocar de nuevo el mismo botón del menú no dispara hashchange: bajar igual
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (a && a.hash === location.hash) { e.preventDefault(); mostrar(); ir(); }
 });
 
 // arranque: el catálogo (enteros/enteros.json, lo genera enteros.py) dice qué decants son Premium
@@ -833,7 +894,7 @@ addEventListener("hashchange", () => {
   ENT = Object.fromEntries(ENTEROS.map(e => [e.slug, e]));
   PERFUMES.forEach(p => { p.ent = ENTEROS.find(e => e.nombre === p.entero); p.premium = !!(p.ent && p.ent.premium); });
   pintarDecants(); pintarMarcas(); pintarEnteros(); pintarCuenta(); iniciarGoogle(); cargarPerfil();
-  if (["#kits", "#suerte"].includes(location.hash)) $(location.hash).scrollIntoView();
+  if (location.hash) ir();
 })();
 </script>
 <script data-goatcounter="https://scentiaprofumo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
