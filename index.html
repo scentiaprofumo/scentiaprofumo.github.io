@@ -128,6 +128,18 @@ s.antes{opacity:.6;margin-right:4px}
 .suerte h2 .serif{text-transform:none}
 .suerte p{color:#e6dfd3;margin:8px auto 0;max-width:40ch}
 .ruleta{font-family:var(--display);font-size:clamp(22px,6vw,34px);text-transform:uppercase;color:var(--gold);min-height:2.6em;display:flex;align-items:center;justify-content:center;margin:14px 0;line-height:1.1}
+.rueda{display:block;width:min(300px,78vw);height:auto;margin:18px auto 6px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6))}
+.rueda{cursor:pointer}
+#rueda-g{transform-box:fill-box;transform-origin:center}
+.rueda path{stroke:var(--bg);stroke-width:.8}
+.rueda .p0{fill:var(--gold)}.rueda .p1{fill:#1d1915}
+.rueda text{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.rueda .t0{fill:#16120c}.rueda .t1{fill:var(--fg)}
+.rueda .aro{fill:none;stroke:var(--gold);stroke-width:4}.rueda .luz{fill:var(--fg)}
+.rueda .eje{fill:var(--bg);stroke:var(--gold);stroke-width:2.5}.rueda .flecha{fill:var(--fg);stroke:var(--bg);stroke-width:2;stroke-linejoin:round}
+#rueda-g.girando{animation:gira .6s linear infinite}
+@keyframes gira{from{transform:rotate(var(--a,0deg))}to{transform:rotate(calc(var(--a,0deg) + 360deg))}}
+.ruleta:empty{display:none}
 .suerte .btn{display:inline-flex;min-width:200px;min-height:50px}
 .probar{border:1px dashed var(--gold);border-radius:12px;padding:10px 14px;margin:0 0 16px;color:#e6dfd3}
 .probar a{color:var(--gold);font-weight:600}
@@ -167,6 +179,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .sellos i.ok{background:var(--gold)}
 .sellos span{color:#e6dfd3;font-size:14px}
 .g-entrar{min-height:44px;display:flex;justify-content:center}
+.g-entrar iframe{color-scheme:normal} /* igual que el botón de Google: si no, el navegador le pinta fondo blanco en modo oscuro */
 .cuenta-box .g-entrar{justify-content:flex-start}
 #suerte-entrar p{margin-bottom:10px}
 .error{background:#3a1519;border:1px solid #8c2f39;color:#f6d6d9;border-radius:10px;padding:10px 12px;margin:0;font-size:14px}
@@ -323,7 +336,8 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
   <p class="k">Una vez por día</p>
   <h2>¿Te sentís <span class="serif">con suerte?</span></h2>
   <p>Girá la ruleta y te toca un perfume con descuento por 24 horas.</p>
-  <div class="ruleta" id="ruleta" aria-live="polite">?</div>
+  <svg class="rueda" id="rueda" viewBox="-110 -110 220 220" role="img" aria-label="Ruleta de 8 porciones"></svg>
+  <div class="ruleta" id="ruleta" aria-live="polite"></div>
   <button type="button" class="btn" id="girar" hidden>Girar la ruleta</button>
   <div id="suerte-entrar"><p>Entrá con tu cuenta de Google para girar.</p><div class="g-entrar"></div></div>
   <div id="suerte-res"></div>
@@ -753,31 +767,66 @@ function pintarSuerte() {
   const g = $("#girar"), res = $("#suerte-res"), r = $("#ruleta");
   $("#suerte-entrar").hidden = !!perfil; g.hidden = !perfil;
   if (g.dataset.girando) return;
-  if (!perfil) { r.textContent = "?"; res.innerHTML = ""; return; }
+  if (!perfil) { r.textContent = ""; res.innerHTML = ""; return; }
   const p = perfil.premio;
   g.disabled = !perfil.puedeGirar;
   g.textContent = perfil.puedeGirar ? "Girar la ruleta" : "Volvé mañana";
-  if (!p) { r.textContent = perfil.puedeGirar ? "?" : "Hasta mañana"; res.innerHTML = ""; return; }
+  if (!p) { r.textContent = perfil.puedeGirar ? "" : "Hasta mañana"; res.innerHTML = ""; return; }
+  // solo si la flecha no está ya en esa porción (evita un salto al terminar de girar)
+  if (RUEDA.length && Math.floor(((-rot % 360) + 360) % 360 / 45) !== porcion(p)) ponerRueda(-(porcion(p) * 45 + 22.5), 0);
   r.textContent = p.nombre;
-  const hasta = new Date(p.hasta).toLocaleString("es-PY", {weekday: "long", hour: "2-digit", minute: "2-digit"});
+  const hasta = new Date(p.hasta).toLocaleString("es-PY", {weekday: "long", hour: "2-digit", minute: "2-digit"}).replace(/\.$/, "");
   res.innerHTML = `<p>¡Te tocó <b>${gs(p.desc)} menos</b> en ${esc(p.nombre)}! Vale hasta el ${hasta}. El descuento aparece solo en tu pedido.</p>
     <p style="margin-top:12px"><button type="button" class="btn" style="min-width:200px" data-add="${p.tipo}" ${p.tipo === "d" ? `data-n="${esc(p.clave)}" data-tam="5 ml"` : `data-slug="${esc(p.clave)}"`}>Agregar al carrito</button></p>`;
 }
+// rueda de 8 porciones: 6 decants y 2 "frasco sorpresa" (la planilla sortea 50% decant / 50% frasco entero)
+let RUEDA = [], rot = 0;
+const corto = n => n.length > 16 ? n.split(" ").slice(-3).join(" ") : n;
+function pintarRueda() {
+  const F = {txt: "Frasco sorpresa"}, ds = PERFUMES.slice(0, 6).map(p => ({d: p.nombre, txt: corto(p.nombre)}));
+  RUEDA = [...ds.slice(0, 3), F, ...ds.slice(3), F];
+  while (RUEDA.length < 8) RUEDA.push(F);
+  const pt = a => `${(96 * Math.sin(a * Math.PI / 180)).toFixed(2)} ${(-96 * Math.cos(a * Math.PI / 180)).toFixed(2)}`;
+  $("#rueda").innerHTML = `<g id="rueda-g">${RUEDA.map((x, i) => `<path class="p${i % 2}" d="M0 0L${pt(i * 45)}A96 96 0 0 1 ${pt(i * 45 + 45)}Z"/>
+    <text class="t${i % 2}" transform="rotate(${i * 45 + 22.5}) translate(0 -58) rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="${x.txt.length > 12 ? 8.5 : 10}">${esc(x.txt)}</text>`).join("")}</g>
+    <circle class="aro" r="98"/>${RUEDA.map((x, i) => `<circle class="luz" r="2.4" transform="rotate(${i * 45}) translate(0 -98)"/>`).join("")}
+    <circle class="eje" r="17"/><image href="img/logo.png" x="-11" y="-11" width="22" height="22"/>
+    <polygon class="flecha" points="-10,-109 10,-109 0,-86"/>`;
+  $("#rueda-g").style.transform = `rotate(${rot}deg)`;
+}
+function porcion(p) {
+  const i = RUEDA.findIndex(x => x.d === p.clave);
+  if (p.tipo === "d" && i >= 0) return i;
+  if (p.tipo === "d") { // shortcut: con más de 6 decants, el premio que no entra en la rueda reemplaza a la porción 0
+    RUEDA[0] = {d: p.clave, txt: corto(p.clave)}; $("#rueda-g text").textContent = RUEDA[0].txt; return 0;
+  }
+  const fr = RUEDA.map((x, j) => x.d ? -1 : j).filter(j => j >= 0);
+  return fr[p.clave.length % fr.length];
+}
+function ponerRueda(deg, ms) {
+  const g = $("#rueda-g"); if (!g) return;
+  g.style.transition = ms ? `transform ${ms}ms cubic-bezier(.15,.75,.2,1)` : "none";
+  g.style.transform = `rotate(${deg}deg)`; rot = deg;
+}
 async function girar() {
-  const g = $("#girar"), r = $("#ruleta");
+  const g = $("#girar"), r = $("#ruleta"), rg = $("#rueda-g");
   if (!perfil || !perfil.puedeGirar || g.dataset.girando) return;
   g.dataset.girando = "1"; g.disabled = true; gc("suerte-girada");
-  const nombres = [...PERFUMES.map(p => "Decant " + p.nombre), ...ENTEROS.filter(e => !e.agotado).map(e => `Frasco ${e.nombre} ${e.ml} ml`)];
   const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let vueltas = 0, demora = 60, listo = false;
-  const fin = new Promise(ok => (function vuelta() {
-    r.textContent = nombres[Math.floor(Math.random() * nombres.length)];
-    if (listo && (quieto || ++vueltas >= 20)) return ok();
-    demora = Math.min(demora * 1.1, 400); setTimeout(vuelta, quieto ? 200 : demora);
-  })());
-  try { perfil.premio = (await api("girar")).premio; perfil.puedeGirar = false; }
+  r.textContent = "Girando…"; $("#suerte-res").innerHTML = "";
+  rg.style.transition = "none"; rg.style.setProperty("--a", rot + "deg");
+  if (!quieto) rg.classList.add("girando");
+  let ok = false;
+  try { perfil.premio = (await api("girar")).premio; perfil.puedeGirar = false; ok = true; }
   catch (x) { $("#suerte-res").innerHTML = `<p class="error">${esc(x.message)}</p>`; }
-  listo = true; await fin;
+  const m = new DOMMatrix(getComputedStyle(rg).transform), a = Math.atan2(m.b, m.a) * 180 / Math.PI;
+  rg.classList.remove("girando"); ponerRueda(a, 0);
+  if (ok && perfil.premio) {
+    rg.getBoundingClientRect(); // aplica el ángulo actual antes de la transición
+    const destino = -(porcion(perfil.premio) * 45 + 22.5) + (Math.random() * 24 - 12);
+    ponerRueda(a + (quieto ? 0 : 360 * 5) + (((destino - a) % 360) + 360) % 360, quieto ? 0 : 4500);
+    if (!quieto) await new Promise(f => setTimeout(f, 4600));
+  }
   delete g.dataset.girando; pintarSuerte(); pintarCarro();
 }
 
@@ -860,7 +909,7 @@ $("#fkit").onsubmit = e => {
   agregar({t: "k", kit: kitActual.id, perfumes: sel});
   $("#dkit").close();
 };
-$("#girar").onclick = girar;
+$("#girar").onclick = $("#rueda").onclick = girar; // tocar la rueda también la gira
 const general = wa("Hola Scentia! Quiero hacer una consulta.");
 $("#wa-fijo").href = general;
 const num = $("#wa-num"); num.href = general; num.textContent = "0972 166 484";
@@ -893,7 +942,7 @@ document.addEventListener("click", e => {
   catch { $("#cuenta").textContent = "No se pudo cargar el catálogo. Escribinos por WhatsApp."; }
   ENT = Object.fromEntries(ENTEROS.map(e => [e.slug, e]));
   PERFUMES.forEach(p => { p.ent = ENTEROS.find(e => e.nombre === p.entero); p.premium = !!(p.ent && p.ent.premium); });
-  pintarDecants(); pintarMarcas(); pintarEnteros(); pintarCuenta(); iniciarGoogle(); cargarPerfil();
+  pintarDecants(); pintarRueda(); pintarMarcas(); pintarEnteros(); pintarCuenta(); iniciarGoogle(); cargarPerfil();
   if (location.hash) ir();
 })();
 </script>
