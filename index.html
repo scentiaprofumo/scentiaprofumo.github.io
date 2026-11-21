@@ -182,6 +182,18 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .sellos i{width:30px;height:30px;border-radius:99px;border:2px solid var(--gold);display:block}
 .sellos i.ok{background:var(--gold)}
 .sellos span{color:var(--fg2);font-size:14px}
+.mis-pedidos{display:grid;gap:8px}
+.mis-pedidos h3{font-size:17px;font-weight:800;letter-spacing:-.01em;margin-top:4px}
+.mis-pedidos details{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.mis-pedidos summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;list-style:none}
+.mis-pedidos summary::-webkit-details-marker{display:none}
+.mis-pedidos summary:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.mis-pedidos summary span{display:flex;flex-direction:column;min-width:0}
+.mis-pedidos summary small{color:var(--muted);font-size:13px}
+.mis-pedidos details p{padding:0 12px 12px;font-size:14px}
+.est{font-style:normal;font-size:12.5px;font-weight:700;border-radius:99px;padding:4px 10px;border:1px solid var(--gold);color:var(--gold);white-space:nowrap}
+.est-enviado,.est-entregado{background:var(--gold);color:var(--sobre-oro)}
+.est-cancelado{border-color:var(--muted);color:var(--muted)}
 .g-entrar{min-height:44px;display:flex;justify-content:center}
 .g-entrar iframe{color-scheme:normal} /* igual que el botón de Google: si no, el navegador le pinta fondo blanco en modo oscuro */
 .cuenta-box .g-entrar{justify-content:flex-start}
@@ -562,11 +574,17 @@ function pintarCuenta() {
       <div class="sellos" aria-label="${llenos} de ${SELLOS} sellos">${Array.from({length: SELLOS}, (_, i) => `<i class="${i < llenos ? "ok" : ""}"></i>`).join("")}
         <span>${perfil.dosPorUno ? "¡Tenés un 2x1 para usar en tu próximo pedido!" : `${llenos} de ${SELLOS} decants para tu 2x1`}</span></div>
       ${probados.length ? `<p>Tenés descuento en el frasco de ${probados.map(([n, m]) => `<b>${esc(titulo(n))}</b> (${gs(m)} menos)`).join(", ")}.</p>` : ""}
+      ${perfil.pedidos ? `<div class="mis-pedidos"><h3>Mis pedidos</h3>${perfil.pedidos.map(p => `<details><summary><span><b>${esc(p.id)}</b>
+        <small>${p.fecha.slice(8, 10)}/${p.fecha.slice(5, 7)} · ${gs(p.total)}</small></span><em class="est est-${p.estado.toLowerCase()}">${esc(p.estado)}</em></summary>
+        <p>${ESTADO_TXT[p.estado] || ""}<br>${esc(p.productos).replace(/\n/g, "<br>")}</p></details>`).join("")
+        || `<p class="chica">Cuando hagas un pedido con tu cuenta, lo vas a ver acá con su estado.</p>`}</div>` : ""}
       <p class="chica">Los sellos se suman cuando confirmamos el pago de tu pedido. <button type="button" class="link" id="salir">Salir</button></p>`;
     $("#salir").onclick = () => salir();
   }
   botonesGoogle(); pintarSuerte(); pintarCarro();
 }
+const ESTADO_TXT = {Nuevo: "Lo recibimos. Te escribimos por WhatsApp para confirmarlo.", Pagado: "Confirmamos tu pago.",
+  Preparando: "Estamos armando tu pedido.", Enviado: "Tu pedido está en camino.", Entregado: "Entregado. ¡Que lo disfrutes!", Cancelado: "Este pedido se canceló."};
 const titulo = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
 
 // ---------- decants ----------
