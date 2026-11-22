@@ -200,7 +200,7 @@ def main():
     (AQUI / "index.html").write_text(idx, encoding="utf-8")
 
     urls = ([(SITIO + "/", "1.0"), (SITIO + "/perfumes/", "0.8")] + [(f"{SITIO}/perfumes/marca-{slug(m)}.html", "0.7") for m in marcas]
-            + [(f"{SITIO}/perfumes/{p['slug']}.html", "0.6") for p in datos] + [(SITIO + "/privacidad.html", "0.1")])
+            + [(f"{SITIO}/perfumes/{p['slug']}.html", "0.6") for p in datos] + [(SITIO + "/privacidad.html", "0.1"), (SITIO + "/cambios.html", "0.2")])
     (AQUI / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"<url><loc>{u}</loc><lastmod>{HOY}</lastmod><priority>{pr}</priority></url>\n" for u, pr in urls) + "</urlset>\n", encoding="utf-8")
     (AQUI / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /_candidatas/\n\nSitemap: {SITIO}/sitemap.xml\n", encoding="utf-8")

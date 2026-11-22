@@ -324,6 +324,16 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 @media (max-width:600px){.hero .chips{display:none}.hero h1{font-size:clamp(40px,11.5vw,84px)}.hero p.lead{font-size:16.5px;margin-top:12px}.hero-btns,.hero .promos{margin-top:16px}}
 @media (max-width:860px){.hero-w{grid-template-columns:1fr;gap:24px}.hero{padding-block:28px 16px}
 .hero-w .semana{flex-direction:row;align-items:center}.hero-w .semana img{width:96px;max-height:none}}
+/* pie de página en columnas */
+.pie{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px;text-align:left;width:100%}
+.pie img{height:40px;width:40px}
+.pie p{margin:10px 0 0;max-width:34ch}
+.pie nav{display:flex;flex-direction:column;gap:8px}
+.pie h3{font-size:15px;font-weight:800;color:var(--fg);margin-bottom:4px}
+.pie nav a{color:var(--muted);text-decoration:none}.pie nav a:hover{color:var(--gold)}
+.pie a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.pie-c{margin:28px 0 0;font-size:13px}
+@media (max-width:760px){.pie{grid-template-columns:1fr 1fr;gap:24px}.pie-marca{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -425,7 +435,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
   <div id="suerte-res"></div>
 </div></div></section>
 
-<section><div class="w">
+<section id="como-pedir"><div class="w">
   <div class="sec-t"><p class="k">Así de fácil</p><h2>¿Cómo <span class="serif">pedir?</span></h2></div>
   <div class="pasos">
     <div><p>Agregá al carrito los decants, kits o frascos que quieras.</p></div>
@@ -445,12 +455,14 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 </div></section>
 </main>
 
-<footer><div class="w" style="display:flex;flex-direction:column;gap:8px;align-items:center">
-  <img src="img/logo.png" alt="">
-  <div>Instagram: <a href="https://instagram.com/scentiaprofumo">@scentiaprofumo</a></div>
-  <div>WhatsApp: <a id="wa-num"></a></div>
-  <div><a href="privacidad.html">Privacidad</a></div>
-</div></footer>
+<footer><div class="w pie">
+  <div class="pie-marca"><img src="img/logo.png" alt="Scentia" width="40" height="40">
+    <p>Perfumes árabes originales: decants de 5 y 10 ml y frascos enteros, con delivery y envíos a todo Paraguay.</p>
+    <p>Instagram: <a href="https://instagram.com/scentiaprofumo">@scentiaprofumo</a><br>WhatsApp: <a id="wa-num"></a></p></div>
+  <nav aria-label="Comprar"><h3>Comprar</h3><a href="#perfumes">Decants</a><a href="#kits">Kits</a><a href="#enteros">Frascos enteros</a><a href="#suerte">Ruleta</a></nav>
+  <nav aria-label="Ayuda"><h3>Ayuda</h3><a href="#como-pedir">Cómo pedir</a><a href="#cuenta-box">Mis pedidos</a><a href="#beneficios">Envíos y pagos</a><a href="cambios.html">Cambios y devoluciones</a><a id="wa-pie">WhatsApp</a></nav>
+  <nav aria-label="Legal"><h3>Legal</h3><a href="privacidad.html">Privacidad</a><a href="cambios.html">Cambios y devoluciones</a></nav>
+</div><p class="pie-c">© 2026 Scentia</p></footer>
 
 <button type="button" class="carro-btn" id="carro-btn" hidden></button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -480,6 +492,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
     <p class="error" id="error-pedido" role="alert" hidden></p>
     <label class="campo"><span>Algo más (opcional)</span><textarea name="nota" rows="2"></textarea></label>
     <div class="resumen" id="resumen2"></div>
+    <p class="dkit-txt" style="font-size:13px;margin:0">Al enviar el pedido aceptás nuestra <a href="cambios.html" target="_blank" rel="noopener">política de cambios y devoluciones</a>.</p>
     <button type="submit" class="btn wa" id="enviar">Enviar pedido por WhatsApp</button>
     <div class="links"><button type="button" class="link" id="volver">Volver al pedido</button></div>
   </form>
@@ -1001,6 +1014,7 @@ $("#fkit").onsubmit = e => {
 $("#girar").onclick = $("#rueda").onclick = girar; // tocar la rueda también la gira
 const general = wa("Hola Scentia! Quiero hacer una consulta.");
 $("#wa-fijo").href = general;
+$("#wa-pie").href = general;
 const num = $("#wa-num"); num.href = general; num.textContent = "0972 166 484";
 
 // Pestañas: #decants / #enteros; cualquier otro #id abre Decants y baja hasta esa sección
