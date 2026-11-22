@@ -38,7 +38,6 @@ a{color:inherit}
 h1,h2,h3{margin:0;text-wrap:balance}
 .k{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin:0}
 .serif{font-family:var(--serif);font-style:italic;color:var(--gold)}
-header.hero{padding-block:48px 40px;text-align:center;background:radial-gradient(90% 70% at 50% 0%,var(--tinte) 0%,transparent 70%)}
 .hero img{height:96px}
 .hero h1{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:clamp(40px,9vw,76px);line-height:.95;margin-top:18px}
 .hero h1 span{display:block;font-family:var(--serif);font-style:italic;text-transform:none;color:var(--gold);font-size:1.15em;font-weight:700}
@@ -46,7 +45,7 @@ header.hero{padding-block:48px 40px;text-align:center;background:radial-gradient
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:22px}
 .chips span{border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:13px;color:var(--muted)}
 section{padding-block:40px}
-section[id]{scroll-margin-top:64px}
+section[id]{scroll-margin-top:76px}
 .sec-t{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}
 .sec-t h2{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:clamp(28px,5vw,40px);line-height:1}
 .sec-t h2 .serif{text-transform:none;font-weight:700}
@@ -80,7 +79,7 @@ footer{border-top:1px solid var(--line);padding-block:32px calc(96px + env(safe-
 footer img{height:48px}
 .wa-fijo{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));background:var(--wa);color:#05210f;font-weight:600;text-decoration:none;border-radius:99px;padding:14px 20px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
 .wa-fijo svg{width:20px;height:20px}
-.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--vidrio);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tabs{background:var(--vidrio);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .tabs .w{display:flex;gap:6px;padding-block:10px}
 .tabs a{flex:1;text-align:center;text-decoration:none;padding:10px 12px;border-radius:99px;font-weight:600;color:var(--muted);border:1px solid var(--line)}
 .tabs a[aria-current="true"]{background:var(--gold);color:var(--sobre-oro);border-color:var(--gold)}
@@ -260,7 +259,6 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 .lado.abierto{transform:none;visibility:visible}
 .lado a,.lado button{min-height:50px}}
 @media (prefers-reduced-motion:reduce){.lado{transition:none}}
-#promos{padding-block:0 8px}
 .promos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .promo{display:flex;flex-direction:column;gap:2px;text-decoration:none;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel)}
 .promo .k{font-size:10.5px;letter-spacing:.2em}
@@ -268,44 +266,95 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 .promo small{color:var(--gold);font-size:13px}
 .promo.dest{border-color:var(--gold);background:linear-gradient(135deg,var(--tinte),var(--panel))}
 .promo:hover{border-color:var(--gold)}
-#cuenta-box{scroll-margin-top:64px}
+#cuenta-box,.card,#promos{scroll-margin-top:76px}
 @media (max-width:760px){.promos{grid-template-columns:1fr 1fr;gap:10px}.promo{padding:12px}.promo b{font-size:17px}}
-@media (max-width:600px){header.hero{padding-block:28px 24px}.hero img{height:72px}}
+
 /* estilo Noche: títulos en minúscula con letra gruesa, inicio a la izquierda, botones redondos */
 .hero h1,.sec-t h2,.card h3,.kit h3,.semana h2,.suerte h2,.cuenta-box h2,.dlg-t h2,.promo b,.listo-t,.lin-i b,.enteros h3{text-transform:none;letter-spacing:-.025em;font-weight:800}
 .hero h1{font-size:clamp(44px,12.5vw,84px);line-height:.95;margin-top:22px}
 .hero h1 span{display:inline;font-weight:400;font-size:1.12em;letter-spacing:-.01em}
 .sec-t h2 .serif,.suerte h2 .serif{font-weight:400;font-size:1.1em}
 .k,.card .marca,.promo .k{text-transform:none;letter-spacing:0;font-size:13.5px}
-header.hero{text-align:left}.hero img{height:52px}.hero p.lead{margin-left:0;max-width:30ch}.chips{justify-content:flex-start}
+.hero{text-align:left}.hero p.lead{margin-left:0;max-width:34ch}.chips{justify-content:flex-start}
 .btn,.tabs a,.x{border-radius:99px}
 .card h3{font-size:22px}.kit h3,.semana h2{font-size:24px}
 .precio-base b,.kit .precio,.enteros .precio,.resumen .total{font-family:var(--body);font-weight:800;letter-spacing:-.02em}
 .pasos div::before{font-family:var(--body);font-weight:800}
 .enteros h3{font-size:15.5px;font-weight:700;letter-spacing:-.01em;line-height:1.2}.enteros h3 a{text-decoration-thickness:1px;text-underline-offset:3px}.enteros .precio{font-size:20px}
 /* modo claro (lo elige el visitante con el botón del menú; se recuerda en el navegador) */
-[data-tema="claro"] .hero img,[data-tema="claro"] footer img{filter:invert(1)}
+[data-tema="claro"] .marca-logo img,[data-tema="claro"] footer img{filter:invert(1)}
 [data-tema="claro"] .card,[data-tema="claro"] .kit,[data-tema="claro"] .promo,[data-tema="claro"] .precio-base div,[data-tema="claro"] .info div,[data-tema="claro"] .cuenta-box,[data-tema="claro"] .suerte{box-shadow:0 1px 0 var(--line)}
 [data-tema="claro"] .wa-fijo,[data-tema="claro"] .carro-btn,[data-tema="claro"] .lado-btn{box-shadow:0 6px 20px rgba(0,0,0,.18)}
 [data-tema="claro"] .rueda .eje{fill:#1c1814}
 .ico-luna,.t-noche,[data-tema="claro"] .ico-sol,[data-tema="claro"] .t-claro{display:none}
 [data-tema="claro"] .ico-luna,[data-tema="claro"] .t-noche{display:inline}
+/* encabezado fijo de tienda: logo, buscador, cuenta y pedido */
+.cabecera{position:sticky;top:0;z-index:7;background:var(--vidrio);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.barra-w{display:flex;align-items:center;gap:12px;min-height:60px;flex-wrap:wrap}
+.marca-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-right:auto}
+.marca-logo img{width:34px;height:34px}
+.marca-logo span{font-weight:600;font-size:15px;letter-spacing:.32em;text-transform:uppercase}
+.buscador{position:relative;flex:0 1 460px;display:flex;align-items:center}
+.buscador>svg{position:absolute;left:14px;width:18px;height:18px;color:var(--muted);pointer-events:none}
+#q{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:99px;color:var(--fg);font:inherit;font-size:15px;padding:10px 16px 10px 40px}
+#q:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.sugerencias{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.35);padding:6px;max-height:70vh;overflow:auto;z-index:8}
+.sug{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--fg);font:inherit;text-align:left;padding:6px;border-radius:10px;cursor:pointer}
+.sug:hover,.sug:focus-visible{background:var(--tinte);outline:none}
+.sug img{width:44px;height:44px;object-fit:cover;border-radius:8px;background:#fff}
+.sug b{display:block;font-size:14.5px;line-height:1.2}.sug small{color:var(--muted);font-size:12.5px}
+.sug em{font-style:normal;font-weight:700;color:var(--gold);font-size:14px;white-space:nowrap}
+.sug-todos{display:block;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--gold);font:inherit;font-weight:600;padding:10px 6px 6px;cursor:pointer;text-align:left}
+.sug-vacio{color:var(--muted);padding:10px 8px;margin:0;font-size:14px}
+.b-ico{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--fg);font:inherit;font-size:14px;font-weight:600;text-decoration:none;padding:8px;border-radius:99px;cursor:pointer}
+.b-ico svg{width:22px;height:22px}
+.b-ico:hover{color:var(--gold)}.b-ico:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.b-ico i{position:absolute;top:0;right:-2px;background:var(--gold);color:var(--sobre-oro);font-style:normal;font-size:10.5px;font-weight:700;min-width:18px;height:18px;line-height:18px;border-radius:99px;text-align:center;padding:0 4px}
+.solo-celu{display:none}
+@media (max-width:760px){.solo-pc{display:none}.solo-celu{display:flex}
+.buscador{display:none;order:9;flex:1 1 100%;padding-bottom:10px}.cabecera.buscando .buscador{display:flex}.sugerencias{top:calc(100% - 4px)}}
+/* inicio: texto a la izquierda, perfume de la semana a la derecha (abajo en el celu) */
+.hero{padding-block:44px 28px;background:radial-gradient(70% 80% at 85% 10%,var(--tinte) 0%,transparent 70%)}
+.hero-w{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:center}
+.hero h1{margin-top:0}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.hero .promos{grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.hero .chips{margin-top:18px}
+.hero-btns .btn{display:inline-flex;min-height:50px;padding:10px 22px}
+.hero-w .semana{flex-direction:column;align-items:stretch;padding:14px;gap:14px}
+.hero-w .semana img{width:100%;height:auto;aspect-ratio:4/5;max-height:430px;object-fit:cover}
+@media (max-width:600px){.hero .chips{display:none}.hero h1{font-size:clamp(40px,11.5vw,84px)}.hero p.lead{font-size:16.5px;margin-top:12px}.hero-btns,.hero .promos{margin-top:16px}}
+@media (max-width:860px){.hero-w{grid-template-columns:1fr;gap:24px}.hero{padding-block:28px 16px}
+.hero-w .semana{flex-direction:row;align-items:center}.hero-w .semana img{width:96px;max-height:none}}
 </style>
 </head>
 <body>
-<header class="hero"><div class="w">
-  <img src="img/logo.png" alt="Logo de Scentia">
-  <h1>Perfumes árabes <span>originales</span></h1>
-  <p class="lead">Decants de 5 y 10 ml para probar en tu piel, y frascos enteros de Lattafa, Armaf, Maison Alhambra, Afnan y más, con delivery y envíos a todo Paraguay.</p>
-  <div class="chips"><span>5 y 10 ml</span><span>100% originales</span><span>Delivery</span><span>Envíos a todo Paraguay</span></div>
+<header class="cabecera" id="barra"><div class="w barra-w">
+  <a class="marca-logo" href="#inicio"><img src="img/logo.png" alt="" width="34" height="34"><span>Scentia</span></a>
+  <div class="buscador" role="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="q" placeholder="Buscá un perfume o una marca" aria-label="Buscar perfume o marca" autocomplete="off" aria-controls="sugerencias">
+    <div class="sugerencias" id="sugerencias" aria-label="Resultados" hidden></div>
+  </div>
+  <button type="button" class="b-ico solo-celu" id="b-lupa" aria-label="Buscar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+  <a class="b-ico solo-pc" href="#cuenta-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg><span>Cuenta</span></a>
+  <button type="button" class="b-ico" id="b-carro" aria-label="Ver mi pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><i id="b-carro-n" hidden></i></button>
 </div></header>
 
-<section id="promos" aria-label="Promos"><div class="w"><div class="promos">
-  <a class="promo dest" href="#semana-sec" id="promo-semana" hidden><span class="k">Perfume de la semana</span><b id="promo-sem-n"></b><small id="promo-sem-p"></small></a>
+<section class="hero" id="inicio"><div class="w hero-w">
+  <div class="hero-txt">
+    <h1>Perfumes árabes <span>originales</span></h1>
+    <p class="lead">Decants de 5 y 10 ml para probar en tu piel, y frascos enteros de Lattafa, Armaf, Maison Alhambra, Afnan y más, con delivery y envíos a todo Paraguay.</p>
+    <div class="hero-btns"><a class="btn" href="#perfumes">Ver decants</a><a class="btn alt" href="#enteros">Ver frascos enteros</a></div>
+    <div class="promos" id="promos" aria-label="Promos">
   <a class="promo" href="#suerte"><span class="k">Ruleta diaria</span><b>Girá y ganá</b><small>Un descuento por 24 h</small></a>
   <a class="promo" href="#kits"><span class="k">Kits</span><b>Probá varios</b><small id="promo-kits"></small></a>
   <a class="promo" href="#beneficios"><span class="k">Beneficios</span><b>2x1 y envío gratis</b><small id="promo-envio"></small></a>
-</div></div></section>
+  <a class="promo" href="#enteros"><span class="k">Frascos enteros</span><b id="promo-frascos-n">Perfumes de 100 ml</b><small>Ofertas del mes</small></a>
+</div>
+    <div class="chips"><span>5 y 10 ml</span><span>100% originales</span><span>Delivery</span><span>Envíos a todo Paraguay</span></div>
+  </div>
+  <div id="semana-sec" hidden><div class="semana" id="semana"></div></div>
+</div></section>
 
 <nav class="lado" id="lado" aria-label="Secciones">
   <a href="#promos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>Promos</a>
@@ -326,7 +375,6 @@ header.hero{text-align:left}.hero img{height:52px}.hero p.lead{margin-left:0;max
 
 <main>
 <div data-panel="decants">
-<section id="semana-sec" hidden><div class="w"><div class="semana" id="semana"></div></div></section>
 
 <section><div class="w">
   <div class="sec-t"><p class="k">Precios</p><h2>Dos precios, <span class="serif">sin vueltas</span></h2></div>
@@ -590,10 +638,10 @@ const titulo = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
 // ---------- decants ----------
 function pintarDecants() {
   $("#precio-base").innerHTML = ["std", "prem"].map(k => `<div><small>${k === "std" ? "Decants" : "Decants Premium"}</small>
-    <b><span>${gs(PRECIO[k]["5 ml"])}</span> · <span>${gs(PRECIO[k]["10 ml"])}</span></b><small>5 ml (${RINDE["5 ml"]} atomizaciones) · 10 ml (${RINDE["10 ml"]})</small></div>`).join("");
+    <b><span>${gs(PRECIO[k]["5 ml"])} ·</span> <span>${gs(PRECIO[k]["10 ml"])}</span></b><small>5 ml (${RINDE["5 ml"]} atomizaciones) · 10 ml (${RINDE["10 ml"]})</small></div>`).join("");
   $("#grid").innerHTML = PERFUMES.map((p, i) => {
     const e = p.ent && !p.ent.agotado ? p.ent : null;
-    return `<article class="card">
+    return `<article class="card" data-perfume="${esc(p.nombre)}">
     <img src="img/${p.img}.jpg" alt="${p.nombre} de ${p.marca}" loading="${i < 2 ? "eager" : "lazy"}" width="800" height="1000">
     <div class="b">
       <div class="tags">${p.nombre === deLaSemana ? '<span class="tag sem">Perfume de la semana</span>' : ""}${p.premium ? '<span class="tag prem">Premium</span>' : ""}</div>
@@ -608,8 +656,7 @@ function pintarDecants() {
   }).join("");
   const s = PERF[deLaSemana];
   if (s) {
-    $("#semana-sec").hidden = false; $("#promo-semana").hidden = false;
-    $("#promo-sem-n").textContent = s.nombre; $("#promo-sem-p").textContent = `5 ml a ${gs(precioUnidad(s, "5 ml"))}`;
+    $("#semana-sec").hidden = false;
     const fin = finSemana.toLocaleDateString("es-PY", {weekday: "long", day: "numeric", month: "numeric", timeZone: "America/Asuncion"});
     $("#semana").innerHTML = `<img src="img/${s.img}.jpg" alt="">
       <div><p class="k">Perfume de la semana</p><h2>${s.nombre}</h2>
@@ -635,6 +682,7 @@ function pintarDecants() {
     ? "Decants y kits: transferencia, o efectivo al recibir (con delivery). Frascos enteros y envíos al interior: transferencia antes del envío."
     : "Transferencia. Te pasamos los datos por WhatsApp y confirmamos el pedido cuando vemos el pago.";
   $("#promo-kits").textContent = `Desde ${gs(Math.min(...KITS.map(k => k.precio)))}`;
+  $("#promo-frascos-n").textContent = `${ENTEROS.filter(e => !e.agotado).length} perfumes`;
   $("#promo-envio").textContent = `Delivery gratis desde ${gs(ENVIO_GRATIS)}`;
   $("#info-envio").textContent = `Delivery de ${DELIVERY}, gratis desde ${gs(ENVIO_GRATIS)}. Envíos al interior: lo coordinamos por WhatsApp.`;
   $("#info-frasco").textContent = `Si compraste el decant, llevá el frasco con ${gs(FRASCO.decant)} menos (${gs(FRASCO.kit)} si fue en un kit), por 30 días, en frascos desde ${gs(FRASCO.minimo)}.`;
@@ -711,7 +759,7 @@ function pintarCarro() {
   const n = c.lineas.reduce((a, {it}) => a + it.q, 0);
   const btn = $("#carro-btn");
   btn.hidden = !n; $("#wa-fijo").hidden = !!n;
-  $("#nav-n").hidden = !n; $("#nav-n").textContent = n;
+  ["#nav-n", "#b-carro-n"].forEach(id => { $(id).hidden = !n; $(id).textContent = n; });
   btn.textContent = `Ver pedido (${n}) · ${gs(c.total)}`;
   $("#lineas").innerHTML = c.lineas.length ? c.lineas.map(({it, l}) => {
     const i = carro.indexOf(it);
@@ -937,7 +985,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("[data-ver-pedido]")) { $("#toast").innerHTML = ""; return abrirCarro(); }
   if (e.target.closest("[data-cerrar]")) e.target.closest("dialog").close();
 });
-$("#carro-btn").onclick = $("#nav-pedido").onclick = abrirCarro;
+$("#carro-btn").onclick = $("#nav-pedido").onclick = $("#b-carro").onclick = abrirCarro;
 $("#continuar").onclick = () => paso(2);
 $("#volver").onclick = () => paso(1);
 $("#fpedido").oninput = pintarCarro;
@@ -977,6 +1025,31 @@ function tema(t) {
 }
 $("#tema").onclick = () => { tema(document.documentElement.dataset.tema === "claro" ? "noche" : "claro"); gc("tema-cambiado"); };
 if (document.documentElement.dataset.tema === "claro") tema("claro");
+// buscador del encabezado: sugiere decants y frascos; Enter muestra todos los frascos que coinciden
+function irA(h) { if (location.hash === h) { mostrar(); ir(); } else location.hash = h; }
+function verFrascos(q) { filtro.q = q; $("#buscar").value = q; pintarEnteros(); cerrarBusqueda(); irA("#enteros"); }
+function cerrarBusqueda() { $("#sugerencias").hidden = true; $("#barra").classList.remove("buscando"); $("#b-lupa").setAttribute("aria-expanded", "false"); }
+$("#q").oninput = () => {
+  const txt = $("#q").value.trim(), q = norm(txt), box = $("#sugerencias");
+  if (q.length < 2) { box.hidden = true; return; }
+  const ds = PERFUMES.filter(p => norm(p.nombre + " " + p.marca).includes(q));
+  const es = ENTEROS.filter(e => !e.agotado && norm(e.nombre + " " + (e.marca || "")).includes(q));
+  box.innerHTML = [...ds.map(p => `<button type="button" class="sug" data-sug="d" data-v="${esc(p.nombre)}"><img src="${mini(p)}" alt=""><span><b>${esc(p.nombre)}</b><small>Decant · ${esc(p.marca)}</small></span><em>${gs(precioUnidad(p, "5 ml"))}</em></button>`),
+    ...es.slice(0, Math.max(0, 6 - ds.length)).map(e => `<button type="button" class="sug" data-sug="e" data-v="${esc(e.nombre)}"><img src="${e.foto}" alt=""><span><b>${esc(titulo(e.nombre))}</b><small>Frasco ${e.ml} ml${e.marca ? " · " + esc(e.marca) : ""}</small></span><em>${gs(e.precio)}</em></button>`)].join("")
+    + (es.length ? `<button type="button" class="sug-todos" data-sug="todos">Ver los ${es.length} frascos con “${esc(txt)}”</button>` : "")
+    || `<p class="sug-vacio">No encontramos “${esc(txt)}”. Escribinos por WhatsApp y te lo conseguimos.</p>`;
+  box.hidden = false;
+};
+$("#q").onkeydown = e => { if (e.key === "Enter") verFrascos($("#q").value.trim()); };
+$("#sugerencias").onclick = e => {
+  const b = e.target.closest("[data-sug]"); if (!b) return;
+  gc("buscador-" + b.dataset.sug);
+  if (b.dataset.sug === "d") { cerrarBusqueda(); irA("#perfumes"); setTimeout(() => { const c = document.querySelector(`.card[data-perfume="${CSS.escape(b.dataset.v)}"]`); if (c) c.scrollIntoView({block: "start"}); }, 50); }
+  else verFrascos(b.dataset.sug === "e" ? b.dataset.v : $("#q").value.trim());
+};
+$("#b-lupa").onclick = () => { const abre = !$("#barra").classList.contains("buscando"); $("#barra").classList.toggle("buscando", abre); $("#b-lupa").setAttribute("aria-expanded", abre); if (abre) $("#q").focus(); else cerrarBusqueda(); };
+document.addEventListener("click", e => { if (!e.target.closest(".buscador, #b-lupa")) $("#sugerencias").hidden = true; });
+addEventListener("keydown", e => { if (e.key === "Escape") $("#sugerencias").hidden = true; });
 function ir() { (document.getElementById(location.hash.slice(1)) || $(".tabs")).scrollIntoView(); }
 addEventListener("hashchange", () => { mostrar(); ir(); });
 // tocar de nuevo el mismo botón del menú no dispara hashchange: bajar igual
