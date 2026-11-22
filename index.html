@@ -26,9 +26,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&display=swap">
 <style>
 :root{--bg:#0c0b0a;--panel:#151311;--line:#2c2620;--fg:#f2ede4;--fg2:#e6dfd3;--muted:#a59c8f;--gold:#d4af6a;--wa:#25d366;
---tinte:#2a2219;--line2:#3a3229;--vidrio:rgba(12,11,10,.94);--sobre-oro:#16120c;--err-bg:#3a1519;--err-fg:#f6d6d9;
+--verde:#74d69a;--tinte:#2a2219;--line2:#3a3229;--vidrio:rgba(12,11,10,.94);--sobre-oro:#16120c;--err-bg:#3a1519;--err-fg:#f6d6d9;
 --display:"Schibsted Grotesk",system-ui,sans-serif;--serif:"Instrument Serif",Georgia,serif;--body:"Schibsted Grotesk",system-ui,sans-serif;color-scheme:dark}
-:root[data-tema="claro"]{--bg:#fff;--panel:#f7f5f1;--line:#e5dfd5;--fg:#1c1814;--fg2:#3d362d;--muted:#6e665a;--gold:#8a6527;
+:root[data-tema="claro"]{--verde:#1d7a44;--bg:#fff;--panel:#f7f5f1;--line:#e5dfd5;--fg:#1c1814;--fg2:#3d362d;--muted:#6e665a;--gold:#8a6527;
 --tinte:#f4efe7;--line2:#ddd4c6;--vidrio:rgba(255,255,255,.94);--sobre-oro:#fff;--err-bg:#fbeaec;--err-fg:#7a1f2a;color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -334,6 +334,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
 .pie a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .pie-c{margin:28px 0 0;font-size:13px}
 @media (max-width:760px){.pie{grid-template-columns:1fr 1fr;gap:24px}.pie-marca{grid-column:1/-1}}
+p.transf,small.transf{color:var(--verde);font-size:13.5px;margin:0}
 </style>
 </head>
 <body>
@@ -484,7 +485,7 @@ button.btn{border:0;font:inherit;font-weight:600;cursor:pointer;width:100%}
     </div></fieldset>
     <label class="campo"><span>Barrio y ciudad</span><input type="text" name="zona" required autocomplete="address-level2"></label>
     <fieldset class="campo"><legend>¿Cómo pagás?</legend><div class="opc">
-      <label><input type="radio" name="pago" value="Transferencia" checked> Transferencia</label>
+      <label><input type="radio" name="pago" value="Transferencia" checked> <span>Transferencia<small class="transf" style="display:block">5 % menos en decants y kits</small></span></label>
       <label id="op-efectivo"><input type="radio" name="pago" value="Efectivo"> Efectivo al recibir</label>
     </div><p class="dkit-txt" id="aviso-pago" style="font-size:14px;margin:0"></p></fieldset>
     <div id="cuenta-pedido" class="aviso"></div>
@@ -543,6 +544,8 @@ const DELIVERY = "Gs. 10.000 a 30.000 según la zona";
 // Efectivo: solo decants y kits con delivery. Frascos enteros y envíos al interior: transferencia antes del envío.
 // Para dejar de aceptar efectivo del todo: false.
 const EFECTIVO = true;
+const DESC_TRANSF = 0.05;                                  // pagando con transferencia: 5 % menos en decants y kits
+const transf = pr => pr - Math.round(pr * DESC_TRANSF / 500) * 500;
 // entero = nombre del perfume en el catálogo del proveedor (para saber si es Premium y mostrar el frasco)
 const PERFUMES = [
   {img:"01-tropical-vibe", nombre:"Tropical Vibe", marca:"Rayhaan", entero:"TROPICAL VIBE", notas:["Mango","Piña","Bergamota","Coco","Almizcle","Ámbar"]},
@@ -663,6 +666,7 @@ function pintarDecants() {
         const base = precioDecant(p, t), pr = precioUnidad(p, t);
         return `<button type="button" class="btn${j ? "" : " alt"}" data-add="d" data-n="${esc(p.nombre)}" data-tam="${t}">Agregar ${t}<small>${pr < base ? `<s class="antes">${gs(base)}</s>` : ""}${gs(pr)}</small></button>`;
       }).join("")}</div>
+      <p class="transf">Con transferencia: ${gs(transf(precioUnidad(p, "5 ml")))} y ${gs(transf(precioUnidad(p, "10 ml")))}</p>
     </div></article>`;
   }).join("");
   const s = PERF[deLaSemana];
@@ -672,12 +676,13 @@ function pintarDecants() {
     $("#semana").innerHTML = `<img src="${foto(s)}" alt="${s.nombre} de ${s.marca}">
       <div><p class="k">Perfume de la semana</p><h2>${s.nombre}</h2>
       <p>5 ml a <b>${gs(precioUnidad(s, "5 ml"))}</b> y 10 ml a <b>${gs(precioUnidad(s, "10 ml"))}</b>, hasta el ${fin}.</p>
+      <p class="transf">Con transferencia: ${gs(transf(precioUnidad(s, "5 ml")))} y ${gs(transf(precioUnidad(s, "10 ml")))}</p>
       <div class="sem-btns"><button type="button" class="btn alt" data-add="d" data-n="${esc(s.nombre)}" data-tam="5 ml">Agregar 5 ml</button>
       <button type="button" class="btn" data-add="d" data-n="${esc(s.nombre)}" data-tam="10 ml">Agregar 10 ml</button></div></div>`;
   }
   $("#kits-grid").innerHTML = KITS.map(k => `<div class="kit"><h3>${k.nombre}</h3>
     <p>${k.n} decants de ${k.tam}, los elegís vos.</p>
-    <div class="precio">${gs(k.precio)}</div>
+    <div class="precio">${gs(k.precio)}</div><p class="transf">${gs(transf(k.precio))} con transferencia</p>
     <small>Ahorrás ${gs(k.n * PRECIO.std[k.tam] - k.precio)} frente a comprarlos sueltos. Cada Premium suma ${gs(EXTRA_PREM[k.tam])}.</small>
     <button type="button" class="btn" data-kit="${k.id}">Armar mi kit</button></div>`).join("")
     + ESTILOS.map((s, i) => {
@@ -686,11 +691,11 @@ function pintarDecants() {
       const pr = k.precio + ps.filter(x => x.premium).length * EXTRA_PREM[k.tam];
       return `<div class="kit"><div class="mini-kit">${ps.map(x => `<img class="flyer" src="${mini(x)}" alt="">`).join("")}</div>
         <h3>Kit ${s.nombre}</h3><p>${s.txt}</p><small>${ps.map(x => x.nombre).join(", ")} · ${k.n} × ${k.tam}</small>
-        <div class="precio">${gs(pr)}</div>
+        <div class="precio">${gs(pr)}</div><p class="transf">${gs(transf(pr))} con transferencia</p>
         <button type="button" class="btn" data-estilo="${i}">Agregar el kit</button></div>`;
     }).join("");
   $("#info-pago").textContent = EFECTIVO
-    ? "Decants y kits: transferencia, o efectivo al recibir (con delivery). Frascos enteros y envíos al interior: transferencia antes del envío."
+    ? "Decants y kits: transferencia (5 % menos) o efectivo al recibir (con delivery). Frascos enteros y envíos al interior: transferencia antes del envío."
     : "Transferencia. Te pasamos los datos por WhatsApp y confirmamos el pedido cuando vemos el pago.";
   $("#promo-kits").textContent = `Desde ${gs(Math.min(...KITS.map(k => k.precio)))}`;
   $("#promo-frascos-n").textContent = `${ENTEROS.filter(e => !e.agotado).length} perfumes`;
@@ -741,6 +746,12 @@ function cuentas(form) {
   const cincos = lineas.filter(({it}) => it.t === "d" && it.tam === "5 ml").flatMap(({it, l}) => Array(it.q).fill(l.unidad));
   const puede2x1 = !!(perfil && perfil.dosPorUno) && cincos.length >= 2;
   if (puede2x1 && form.fiel.checked) { desc.push({txt: "2x1 de cliente fiel", monto: Math.min(...cincos)}); usa2x1 = true; }
+  if (form.pago.value === "Transferencia") {
+    // shortcut: no descuenta el 5 % sobre el premio de la ruleta (Gs. 250 de diferencia); revisar si el premio sube
+    const ahorro = lineas.reduce((a, {it, l}) => a + (it.t === "d" || it.t === "k" ? (l.unidad - transf(l.unidad)) * it.q : 0), 0)
+      - (usa2x1 ? Math.min(...cincos) - transf(Math.min(...cincos)) : 0);  // el decant regalado del 2x1 no tiene 5 %
+    if (ahorro > 0) desc.push({txt: "5 % por pagar con transferencia", monto: ahorro});
+  }
   const total = Math.max(0, subtotal - desc.reduce((a, d) => a + d.monto, 0));
   const decants = lineas.reduce((a, {it}) => a + (it.t === "d" ? it.q : it.t === "k" ? (KITS.find(k => k.id === it.kit) || {n: 0}).n * it.q : 0), 0);
   return {lineas, subtotal, desc, total, premio, frasco, usa2x1, puede2x1, decants};
@@ -798,7 +809,7 @@ function pintarCarro() {
   $("#aviso-pago").textContent = !EFECTIVO ? "Te pasamos los datos para transferir por WhatsApp. Confirmamos el pedido cuando vemos el pago."
     : conEntero ? "Los frascos enteros se pagan por transferencia antes del envío."
     : entrega === "interior" ? "Los envíos al interior se pagan por transferencia antes del despacho."
-    : "Si transferís, confirmamos el pedido cuando vemos el pago en la cuenta.";
+    : "Con transferencia tenés 5 % menos en decants y kits. Confirmamos el pedido cuando vemos el pago en la cuenta.";
   const cp = $("#cuenta-pedido");
   if (perfil) cp.innerHTML = `Comprás como <b>${esc(perfil.nombre)}</b>.${c.decants ? ` Este pedido te suma ${c.decants} sello${c.decants === 1 ? "" : "s"} cuando confirmemos el pago.` : ""}`;
   else if (!cp.querySelector(".g-entrar")) { cp.innerHTML = `¿Querés sumar sellos y usar tus descuentos? Entrá con Google antes de enviar.<div class="g-entrar" style="margin-top:10px"></div>`; botonesGoogle(); }
